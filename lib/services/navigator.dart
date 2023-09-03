@@ -42,20 +42,20 @@ class _MainNavigatorState extends State<MainNavigator> {
         selectedIndex: currentPageIndex,
         tabs: const [
           GButton(
-            icon: Icons.home,
+            icon: Icons.store_rounded,
             text: 'Home',
           ),
           GButton(
-            icon: Icons.search,
-            text: 'Search',
+            icon: Icons.all_inclusive_rounded,
+            text: 'Analytics',
           ),
           GButton(
-            icon: Icons.shopping_cart,
-            text: 'Cart',
+            icon: Icons.restaurant_menu_rounded,
+            text: 'Menu',
           ),
           GButton(
-            icon: Icons.account_circle,
-            text: 'Profile',
+            icon: Icons.settings_rounded,
+            text: 'Settings',
           ),
         ],
       ),

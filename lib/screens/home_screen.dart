@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/user.dart';
-import 'package:food_delivery_restraunt/restaurant.dart';
+import 'package:food_delivery_restraunt/classes/restaurant.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
@@ -8,10 +8,9 @@ import 'dart:ui';
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
   int loginID = -1;
-  User user;
-  List<Restaurant> restaurants;
+  Restaurant restaurant;
 
-  HomeScreen({super.key, required this.user, required this.restaurants});
+  HomeScreen({super.key, required this.restaurant});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -78,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: FlexibleSpaceBar(
                 title: Text(
-                  'Dhaba',
+                  widget.restaurant.name,
                   style: TextStyle(
                     fontFamily: 'Britanic',
                     fontSize: 40,

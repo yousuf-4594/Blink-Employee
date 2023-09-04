@@ -9,9 +9,8 @@ import 'package:food_delivery_restraunt/components/bottom_container.dart';
 import 'package:food_delivery_restraunt/mysql.dart';
 import 'package:food_delivery_restraunt/user.dart';
 import 'package:mysql_client/mysql_client.dart';
-import 'package:food_delivery_restraunt/restaurant.dart';
+import 'package:food_delivery_restraunt/classes/restaurant.dart';
 import 'package:food_delivery_restraunt/arguments/home_screen_arguments.dart';
-import 'package:food_delivery_restraunt/screens/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static const id = 'login_screen';
@@ -24,12 +23,13 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   late String username;
+  late String ownerName;
   List<Restaurant> restaurants = [];
   late String password;
   bool loginValid = true;
   String loginFailedMessage = '';
   late int loginID;
-  late String firstName;
+  late String restaurantName;
 
   Widget buildBottomSheet(BuildContext context) {
     return BottomContainer();
@@ -44,11 +44,12 @@ class _LoginScreenState extends State<LoginScreen> {
     //     'SELECT * FROM Customer WHERE username="$username" AND password="$password";');
     // conn.close();
     Iterable<ResultSetRow> rows = await db.getResults(
-        'SELECT * FROM Customer WHERE username="$username" AND password="$password";');
+        'SELECT * FROM Restaurant WHERE username="$username" AND password="$password";');
     if (rows.length == 1) {
       for (var row in rows) {
-        loginID = int.parse(row.assoc()['customer_id']!);
-        firstName = row.assoc()['first_name']!;
+        loginID = int.parse(row.assoc()['restaurant_id']!);
+        restaurantName = row.assoc()['name']!;
+        ownerName = row.assoc()['owner_name']!;
       }
       return true;
     } else {
@@ -166,11 +167,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         loginFailedMessage = '';
                       });
                       getRestaurants();
+                      Restaurant restaurant = Restaurant(
+                          restaurantID: loginID,
+                          name: restaurantName,
+                          ownerName: ownerName);
                       Navigator.pushNamed(context, MainNavigator.id,
-                          arguments: HomeScreenArguments(
-                            user: User(id: loginID, firstName: firstName),
-                            restaurants: restaurants,
-                          ));
+                          arguments:
+                              HomeScreenArguments(restaurant: restaurant));
                     } else {
                       setState(
                         () {

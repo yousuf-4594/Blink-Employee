@@ -61,8 +61,7 @@ class _MainNavigatorState extends State<MainNavigator> {
       ),
       body: <Widget>[
         HomeScreen(
-          user: homeScreenArguments.user,
-          restaurants: homeScreenArguments.restaurants,
+          restaurant: homeScreenArguments.restaurant,
         ),
         LoginScreen(),
         MenuScreen(),

@@ -1,9 +1,8 @@
 import 'package:food_delivery_restraunt/user.dart';
-import 'package:food_delivery_restraunt/restaurant.dart';
+import 'package:food_delivery_restraunt/classes/restaurant.dart';
 
 class HomeScreenArguments {
-  User user;
-  List<Restaurant> restaurants;
+  Restaurant restaurant;
 
-  HomeScreenArguments({required this.user, required this.restaurants});
+  HomeScreenArguments({required this.restaurant});
 }

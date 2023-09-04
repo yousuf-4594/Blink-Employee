@@ -340,7 +340,7 @@ class _OrderListViewState extends State<OrderListView> {
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
                           child: Text(
-                              'Finish', // supposed to be a button  [Finish | Prepare]
+                              '${item.status}', // supposed to be a button  [Finish | Prepare]
                               style: TextStyle(
                                 fontSize: 20,
                                 color: Colors.white,

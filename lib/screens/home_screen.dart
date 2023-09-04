@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:food_delivery_restraunt/user.dart';
+import 'package:food_delivery_restraunt/classes/order.dart';
 import 'package:food_delivery_restraunt/classes/restaurant.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter/services.dart';
@@ -148,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 DefaultTabController(
-                  length: 3,
+                  length: 1,
                   child: Column(
                     children: [
                       SizedBox(height: 10),
@@ -170,18 +170,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                       style: TextStyle(),
                                     ),
                                   ),
-                                  Tab(
-                                    child: Text(
-                                      'Preparing',
-                                      style: TextStyle(),
-                                    ),
-                                  ),
-                                  Tab(
-                                    child: Text(
-                                      'Completed',
-                                      style: TextStyle(),
-                                    ),
-                                  ),
+                                  // Tab(
+                                  //   child: Text(
+                                  //     'Preparing',
+                                  //     style: TextStyle(),
+                                  //   ),
+                                  // ),
+                                  // Tab(
+                                  //   child: Text(
+                                  //     'Completed',
+                                  //     style: TextStyle(),
+                                  //   ),
+                                  // ),
                                 ],
                                 labelColor: Color.fromARGB(255, 0, 0, 0),
                                 unselectedLabelColor:
@@ -204,9 +204,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             },
                             child: TabBarView(
                               children: [
-                                OrderListView(itemList: itemList),
-                                OrderListView(itemList: itemList),
-                                OrderListView(itemList: itemList),
+                                OrderListView(
+                                    restaurantID:
+                                        widget.restaurant.restaurantID,
+                                    status: 'all'),
+                                // OrderListView(itemList: itemList),
+                                // OrderListView(itemList: itemList),
                               ],
                             )),
                       ),
@@ -223,22 +226,44 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class OrderListView extends StatefulWidget {
-  final itemList;
+  final String status;
+  final int restaurantID;
 
-  const OrderListView({Key? key, required this.itemList}) : super(key: key);
+  const OrderListView(
+      {Key? key, required this.status, required this.restaurantID})
+      : super(key: key);
 
   @override
   _OrderListViewState createState() => _OrderListViewState();
 }
 
 class _OrderListViewState extends State<OrderListView> {
+  late List<Order> orders = [];
+
+  void getOrders() async {
+    List<Order> tempOrders = await Order.getOrders(widget.restaurantID);
+    if (this.mounted) {
+      setState(() {
+        orders = tempOrders;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getOrders();
+    print('sli');
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
       physics: NeverScrollableScrollPhysics(),
-      itemCount: widget.itemList.length,
+      itemCount: orders.length,
       itemBuilder: (context, index) {
-        final item = widget.itemList[index];
+        final item = orders[index];
         return Padding(
           padding: (index == 0)
               ? const EdgeInsets.symmetric(vertical: 10.0)
@@ -251,7 +276,7 @@ class _OrderListViewState extends State<OrderListView> {
                 SlidableAction(
                   onPressed: (context) {
                     setState(() {
-                      widget.itemList.removeAt(index);
+                      orders.removeAt(index);
                     });
                   },
                   autoClose: true,
@@ -303,7 +328,7 @@ class _OrderListViewState extends State<OrderListView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text('#675', // order number
+                        Text('#${item.orderID}', // order number
                             style: TextStyle(
                               fontSize: 20,
                               color: Colors.white,
@@ -371,7 +396,7 @@ class _OrderListViewState extends State<OrderListView> {
                             padding: EdgeInsets.only(
                                 right: 25, top: 10, bottom: 10, left: 10),
                             alignment: Alignment.centerRight,
-                            child: Text('240rs', // tot price
+                            child: Text('Rs ${item.price}', // tot price
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,

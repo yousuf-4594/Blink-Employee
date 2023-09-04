@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/screens/home_screen.dart';
 import 'package:food_delivery_restraunt/screens/restaurant_screen.dart';
 import 'package:food_delivery_restraunt/screens/settings_screen.dart';
-import 'package:food_delivery_restraunt/screens/cart_screen.dart';
+import 'package:food_delivery_restraunt/screens/menu_screen.dart';
 import 'package:food_delivery_restraunt/screens/search_screen.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:food_delivery_restraunt/screens/login_screen.dart';
@@ -65,7 +65,7 @@ class _MainNavigatorState extends State<MainNavigator> {
           restaurants: homeScreenArguments.restaurants,
         ),
         LoginScreen(),
-        CartScreen(),
+        MenuScreen(),
         SettingsScreen(),
       ][currentPageIndex],
     );

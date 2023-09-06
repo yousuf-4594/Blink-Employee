@@ -254,7 +254,6 @@ class _OrderListViewState extends State<OrderListView> {
     // TODO: implement initState
     super.initState();
     getOrders();
-    print('sli');
   }
 
   @override
@@ -350,43 +349,48 @@ class _OrderListViewState extends State<OrderListView> {
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.only(
-                        top: 10, bottom: 10, left: 20, right: 25),
-                    decoration: BoxDecoration(
-                      color: Color.fromARGB(107, 255, 135, 61),
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              child: Text('1 x'), // quantity
-                              padding: EdgeInsets.all(5),
-                              margin: EdgeInsets.only(right: 10),
-                              decoration: BoxDecoration(
-                                color: Colors.grey,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20)),
-                              ),
-                            ),
-                            Text('Chicken roll', // item
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.white,
-                                )),
-                          ],
-                        ),
-                        Text('180rs', // item price
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.white,
-                            )),
-                      ],
-                    ),
-                  ),
+                      padding: EdgeInsets.only(
+                          top: 10, bottom: 10, left: 20, right: 25),
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(107, 255, 135, 61),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: ListView.builder(
+                          itemCount: item.orderDetails.length,
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      child: Text('1 x'), // quantity
+                                      padding: EdgeInsets.all(5),
+                                      margin: EdgeInsets.only(right: 10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(20)),
+                                      ),
+                                    ),
+                                    Text(item.orderDetails[index].name, // item
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          color: Colors.white,
+                                        )),
+                                  ],
+                                ),
+                                Text(
+                                    'Rs ${item.orderDetails[index].price}', // item price
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.white,
+                                    )),
+                              ],
+                            );
+                          })),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.end,

@@ -100,6 +100,7 @@ class _CartScreenState extends State<MenuScreen> {
         ),
       ),
       body: ListView(
+        physics: BouncingScrollPhysics(),
         children: [
           SizedBox(
             height: 30,

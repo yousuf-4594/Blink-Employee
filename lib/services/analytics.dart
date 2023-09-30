@@ -29,4 +29,18 @@ class Analytics {
     }
     return count;
   }
+
+  static Future<int> getRevenue(int restaurantID) async {
+    int revenue = 0;
+    Mysql db = Mysql();
+    Iterable<ResultSetRow> rows = await db.getResults(
+        'SELECT COALESCE(SUM(price), 0) AS revenue FROM Orders WHERE restaurant_id=$restaurantID AND status="completed"');
+    if (rows.isNotEmpty) {
+      for (var row in rows) {
+        revenue = int.parse(row.assoc()['revenue']!);
+        break;
+      }
+    }
+    return revenue;
+  }
 }

@@ -15,14 +15,17 @@ class AnalyticsScreen extends StatefulWidget {
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
   int ordersPlaced = 0;
   int impressions = 0;
+  int revenue = 0;
 
   void getAnalytics(int restaurantID) async {
     int orders = await Analytics.getOrdersPlaced(restaurantID);
     int views = await Analytics.getImpressions(restaurantID);
+    int amount = await Analytics.getRevenue(restaurantID);
 
     setState(() {
       ordersPlaced = orders;
       impressions = views;
+      revenue = amount;
     });
   }
 
@@ -286,7 +289,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       Container(
                         alignment: Alignment.bottomLeft,
                         child: Text(
-                          '12,000rs',
+                          'Rs $revenue',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 45,

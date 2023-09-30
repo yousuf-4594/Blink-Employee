@@ -47,7 +47,7 @@ class _MainNavigatorState extends State<MainNavigator> {
           ),
           GButton(
             icon: Icons.all_inclusive_rounded,
-            text: 'Analytics',
+            text: 'Analy',
           ),
           GButton(
             icon: Icons.restaurant_menu_rounded,
@@ -64,7 +64,9 @@ class _MainNavigatorState extends State<MainNavigator> {
           restaurant: homeScreenArguments.restaurant,
         ),
         // LoginScreen(),
-        AnalyticsScreen(),
+        AnalyticsScreen(
+          restaurant: homeScreenArguments.restaurant,
+        ),
         MenuScreen(),
         SettingsScreen(),
       ][currentPageIndex],

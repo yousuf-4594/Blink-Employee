@@ -1,14 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:food_delivery_restraunt/services/analytics.dart';
+
+import '../classes/restaurant.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   static const String id = 'analytics_screen';
-  const AnalyticsScreen({super.key});
+  Restaurant restaurant;
+  AnalyticsScreen({super.key, required this.restaurant});
 
   @override
   State<AnalyticsScreen> createState() => _AnalyticsScreenState();
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
+  int ordersPlaced = 0;
+  int impressions = 0;
+
+  void getAnalytics(int restaurantID) async {
+    int orders = await Analytics.getOrdersPlaced(restaurantID);
+    int views = await Analytics.getImpressions(restaurantID);
+
+    setState(() {
+      ordersPlaced = orders;
+      impressions = views;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getAnalytics(widget.restaurant.restaurantID);
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -46,7 +70,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       Container(
                         alignment: Alignment.bottomLeft,
                         child: Text(
-                          '12000',
+                          '$impressions',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 45,
@@ -146,7 +170,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                             Container(
                               alignment: Alignment.bottomLeft,
                               child: Text(
-                                '126',
+                                '$ordersPlaced',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 45,
@@ -292,7 +316,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 flex: 1,
                 child: Container(
                   margin: EdgeInsets.only(left: 5, top: 10, right: 5),
-                  padding: EdgeInsets.all(5),
+                  padding: EdgeInsets.all(3),
                   decoration: BoxDecoration(
                     color: Colors.black26,
                     borderRadius: BorderRadius.circular(20),
@@ -339,7 +363,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                                       width: 5,
                                     ),
                                     Text(
-                                      'food item $i',
+                                      'food $i',
                                       style: TextStyle(
                                         fontSize: 20,
                                         color: Colors.white,

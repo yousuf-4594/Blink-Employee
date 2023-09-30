@@ -3,7 +3,7 @@ import 'package:food_delivery_restraunt/screens/home_screen.dart';
 import 'package:food_delivery_restraunt/screens/restaurant_screen.dart';
 import 'package:food_delivery_restraunt/screens/settings_screen.dart';
 import 'package:food_delivery_restraunt/screens/menu_screen.dart';
-import 'package:food_delivery_restraunt/screens/search_screen.dart';
+import 'package:food_delivery_restraunt/screens/analytics_screen.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:food_delivery_restraunt/screens/login_screen.dart';
 import 'package:food_delivery_restraunt/user.dart';
@@ -63,7 +63,8 @@ class _MainNavigatorState extends State<MainNavigator> {
         HomeScreen(
           restaurant: homeScreenArguments.restaurant,
         ),
-        LoginScreen(),
+        // LoginScreen(),
+        AnalyticsScreen(),
         MenuScreen(),
         SettingsScreen(),
       ][currentPageIndex],

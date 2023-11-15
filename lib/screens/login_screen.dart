@@ -44,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
     //     'SELECT * FROM Customer WHERE username="$username" AND password="$password";');
     // conn.close();
     Iterable<ResultSetRow> rows = await db.getResults(
-        'SELECT * FROM Restaurant WHERE username="$username" AND password="$password";');
+        'SELECT * FROM Restaurant R INNER JOIN RestaurantAccount A ON (R.username = A.username) WHERE R.username="$username" AND A.password="$password";');
     if (rows.length == 1) {
       for (var row in rows) {
         loginID = int.parse(row.assoc()['restaurant_id']!);

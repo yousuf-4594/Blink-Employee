@@ -149,7 +149,7 @@ class CategoryWidget extends StatefulWidget {
 }
 
 class _CategoryWidgetState extends State<CategoryWidget> {
-  bool isEditMode = false;
+  bool isEditMode = true;
   List<bool> foodSelected = [];
 
   @override

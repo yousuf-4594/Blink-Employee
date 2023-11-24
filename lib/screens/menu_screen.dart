@@ -90,7 +90,7 @@ class _CartScreenState extends State<MenuScreen> {
             IconButton(
               icon: Icon(Icons.edit),
               onPressed: () {
-                print("Change vendor name");
+                print("Change vendor name right now");
               },
             ),
           ],

@@ -89,7 +89,9 @@ class _CartScreenState extends State<MenuScreen> {
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.edit),
-              onPressed: () {},
+              onPressed: () {
+                print("Change vendor name");
+              },
             ),
           ],
           shape: RoundedRectangleBorder(
@@ -147,8 +149,15 @@ class CategoryWidget extends StatefulWidget {
 }
 
 class _CategoryWidgetState extends State<CategoryWidget> {
+  bool isEditMode = false;
+  List<bool> foodSelected = [];
+
   @override
   Widget build(BuildContext context) {
+    if (foodSelected.isEmpty) {
+      foodSelected = List.generate(widget.disp.items.length, (index) => false);
+    }
+
     return Container(
       width: double.infinity,
       margin: EdgeInsets.only(top: 20, left: 5, right: 5),
@@ -162,20 +171,43 @@ class _CategoryWidgetState extends State<CategoryWidget> {
           Container(
             margin: EdgeInsets.only(left: 10, top: 10),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  widget.disp.categoryName,
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      widget.disp.categoryName,
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    IconButton(
+                      iconSize: 25,
+                      onPressed: () {
+                        setState(() {
+                          isEditMode = !isEditMode;
+                          foodSelected = List.generate(
+                              widget.disp.items.length, (index) => false);
+                        });
+                      },
+                      color: Colors.white,
+                      icon: Icon(Icons.edit_square),
+                    ),
+                  ],
                 ),
-                IconButton(
-                    iconSize: 25,
+                if (!isEditMode)
+                  TextButton(
                     onPressed: () {},
-                    color: Colors.white,
-                    icon: Icon(Icons.edit_square))
+                    child: Text(
+                      'delete',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -186,60 +218,224 @@ class _CategoryWidgetState extends State<CategoryWidget> {
             itemCount: widget.disp.items.length,
             itemBuilder: (context, index) {
               final item = widget.disp.items[index];
-              return Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30.0),
-                  color: Colors.brown,
-                ),
-                margin: EdgeInsets.only(top: 10.0, right: 5, left: 5),
-                child: Container(
-                    child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      margin: EdgeInsets.only(left: 3, top: 3, bottom: 3),
+
+              TextEditingController namecontroller =
+                  TextEditingController(text: item.title);
+              TextEditingController pricecontroller =
+                  TextEditingController(text: item.price);
+
+              if (isEditMode) {
+                return GestureDetector(
+                  onTap: () {
+                    print(index);
+
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: const Color.fromARGB(255, 252, 252, 252),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(20)),
+                      ),
+                      builder: (BuildContext context) {
+                        return SingleChildScrollView(
+                          child: Container(
+                            padding: EdgeInsets.all(16.0),
+                            height: MediaQuery.of(context).size.height * 0.7,
+                            width: MediaQuery.of(context).size.width,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Edit Food item',
+                                  style: TextStyle(
+                                    fontSize: 25.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 32.0),
+                                Text("Food Name:"),
+                                SizedBox(height: 8.0),
+                                TextField(
+                                  controller: namecontroller,
+                                  decoration: InputDecoration(
+                                    hintText: 'Enter Food Name',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                ),
+                                SizedBox(height: 16.0),
+                                Text("Food Price:"),
+                                SizedBox(height: 8.0),
+                                TextField(
+                                  onTap: () {
+                                    pricecontroller.clear();
+                                  },
+                                  controller: pricecontroller,
+                                  decoration: InputDecoration(
+                                    hintText: 'Enter Food Price',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                ),
+                                SizedBox(height: 25.0),
+                                InkWell(
+                                  onTap: () {},
+                                  child: Container(
+                                    padding:
+                                        EdgeInsets.only(top: 15, bottom: 15),
+                                    decoration: BoxDecoration(
+                                        color: Colors.amber,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(5))),
+                                    alignment: Alignment.center,
+                                    child: Text('Edit'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  onLongPress: () {
+                    setState(() {
+                      isEditMode = !isEditMode;
+                    });
+                    print("longpress");
+                  },
+                  child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(30)),
-                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30.0),
+                        color: Colors.brown,
                       ),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      item.title,
-                      style: TextStyle(
-                        color: Colors.white,
-                        // fontWeight: FontWeight.bold,
-                        fontSize: 17,
+                      margin: EdgeInsets.only(top: 15.0, right: 5, left: 5),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            margin: EdgeInsets.only(left: 3, top: 3, bottom: 3),
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30)),
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            item.title,
+                            style: TextStyle(
+                              color: Colors.white,
+                              // fontWeight: FontWeight.bold,
+                              fontSize: 17,
+                            ),
+                          ),
+                          Spacer(),
+                          Text(
+                            item.price,
+                            style: TextStyle(
+                              color: Colors.white,
+                              // fontWeight: FontWeight.bold,
+                              fontSize: 17,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                        ],
+                      )),
+                );
+              } else if (!isEditMode) {
+                return Container(
+                  margin: EdgeInsets.only(top: 14.0, right: 5, left: 5),
+                  child: Container(
+                      child: Row(
+                    children: [
+                      Theme(
+                        data: ThemeData(
+                          unselectedWidgetColor:
+                              Colors.white, // Color of the box when unchecked
+                          checkboxTheme: CheckboxThemeData(
+                            checkColor: MaterialStateColor.resolveWith(
+                              (states) => Colors.black,
+                            ),
+                            mouseCursor: MaterialStateMouseCursor.clickable,
+                          ),
+                        ),
+                        child: Checkbox(
+                          value: foodSelected[index],
+                          onChanged: (bool? value) {
+                            setState(() {
+                              foodSelected[index] = value!;
+                            });
+                          },
+                        ),
                       ),
-                    ),
-                    Spacer(),
-                    Text(
-                      item.price,
-                      style: TextStyle(
-                        color: Colors.white,
-                        // fontWeight: FontWeight.bold,
-                        fontSize: 17,
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30.0),
+                            color: Colors.brown,
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                margin:
+                                    EdgeInsets.only(left: 3, top: 3, bottom: 3),
+                                decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(30)),
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                item.title,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  // fontWeight: FontWeight.bold,
+                                  fontSize: 17,
+                                ),
+                              ),
+                              Spacer(),
+                              Text(
+                                item.price,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  // fontWeight: FontWeight.bold,
+                                  fontSize: 17,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                  ],
-                )),
-              );
+                    ],
+                  )),
+                );
+              }
             },
           ),
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              print('a');
+              AddMenuItemBottomSheet(context);
+            },
             child: Container(
               width: double.infinity,
               height: 35,
               margin: EdgeInsets.only(top: 15, left: 5, right: 5, bottom: 5),
               decoration: BoxDecoration(
-                color: Color.fromARGB(145, 118, 79, 79),
+                color: Color.fromARGB(80, 255, 255, 255),
                 borderRadius: BorderRadius.circular(30.0),
               ),
               child: Row(
@@ -249,6 +445,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                     '+',
                     style: TextStyle(
                       color: Colors.white,
+                      fontWeight: FontWeight.w100,
                       fontSize: 30,
                     ),
                   ),
@@ -256,7 +453,8 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                     '  Add',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16,
                     ),
                   ),
                 ],
@@ -265,6 +463,68 @@ class _CategoryWidgetState extends State<CategoryWidget> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<dynamic> AddMenuItemBottomSheet(BuildContext context) {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color.fromARGB(255, 252, 252, 252),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            height: MediaQuery.of(context).size.height * 0.7,
+            width: MediaQuery.of(context).size.width,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.disp.categoryName,
+                  style: TextStyle(
+                    fontSize: 25.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 32.0),
+                Text("Food Name:"),
+                SizedBox(height: 8.0),
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Enter Food Name',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 16.0),
+                Text("Food Price:"),
+                SizedBox(height: 8.0),
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Enter Food Price',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 25.0),
+                InkWell(
+                  onTap: () {},
+                  child: Container(
+                    padding: EdgeInsets.only(top: 15, bottom: 15),
+                    decoration: BoxDecoration(
+                        color: Colors.amber,
+                        borderRadius: BorderRadius.all(Radius.circular(5))),
+                    alignment: Alignment.center,
+                    child: Text('Add to menu'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

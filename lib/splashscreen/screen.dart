@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:food_delivery_restraunt/main.dart';
 
-Future<void> saveToSharedPreferences() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setBool('isviewed', true);
-}
+// Future<void> saveToSharedPreferences() async {
+//   SharedPreferences prefs = await SharedPreferences.getInstance();
+//   await prefs.setBool('isviewed', true);
+// }
 
 void navigateToMainScreen(BuildContext context) {
   Navigator.pushReplacement(

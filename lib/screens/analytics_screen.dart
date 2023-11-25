@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:food_delivery_restraunt/screens/revenueScreen.dart';
 import 'package:food_delivery_restraunt/services/analytics.dart';
 
 import 'package:fl_chart/fl_chart.dart';
@@ -8,6 +9,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../classes/restaurant.dart';
 import '../graphs/barGraphDoubleLines.dart';
 import '../graphs/piChart.dart';
+import '../graphs/revenueLineChart.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   static const String id = 'analytics_screen';
@@ -256,6 +258,11 @@ class RevenueRow extends StatelessWidget {
       child: InkWell(
         onTap: () {
           print('widget a pressed');
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => (revenueScreen())),
+          );
         },
         borderRadius: BorderRadius.circular(20),
         child: Container(

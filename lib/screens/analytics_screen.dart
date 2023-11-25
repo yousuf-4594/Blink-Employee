@@ -1,11 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/classes/PopularFood.dart';
 import 'package:food_delivery_restraunt/mysql.dart';
+import 'package:food_delivery_restraunt/screens/orderPlaceScreen.dart';
+import 'package:food_delivery_restraunt/screens/revenueScreen.dart';
 import 'package:food_delivery_restraunt/services/analytics.dart';
-
-import 'package:fl_chart/fl_chart.dart';
 
 import '../classes/restaurant.dart';
 import '../graphs/barGraphDoubleLines.dart';
@@ -19,9 +17,6 @@ class AnalyticsScreen extends StatefulWidget {
   @override
   State<AnalyticsScreen> createState() => _AnalyticsScreenState();
 }
-
-// A good fl_chart graph library explanation
-// https://www.youtube.com/watch?v=MFvq0MdeKcI
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
   int ordersPlaced = 0;
@@ -40,34 +35,21 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     });
   }
 
-  late var timer;
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    if (mounted) {
-      getAnalytics(widget.restaurant.restaurantID);
-      timer = Timer.periodic(
-          const Duration(seconds: 60), (Timer t) => setState(() {}));
-    }
-  }
-
-  @override
-  void dispose() {
-    timer.cancel();
-    super.dispose();
+    getAnalytics(widget.restaurant.restaurantID);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.black,
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(60.0),
           child: AppBar(
             automaticallyImplyLeading: false,
-            title: const Text(
+            title: Text(
               'Dhaba',
               style: TextStyle(
                 fontSize: 50,
@@ -75,7 +57,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               ),
             ),
             backgroundColor: Colors.black,
-            shape: const RoundedRectangleBorder(
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () {
+                  print("Change vendor name right now");
+                },
+              ),
+            ],
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(
                 bottom: Radius.circular(20.0),
               ),
@@ -84,7 +74,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         ),
         body: SafeArea(
             child: SingleChildScrollView(
-          physics: BouncingScrollPhysics(),
           child: Column(
             children: <Widget>[
               ImpressionRow(impressions: impressions),
@@ -288,6 +277,11 @@ class RevenueRow extends StatelessWidget {
       child: InkWell(
         onTap: () {
           print('widget a pressed');
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => (revenueScreen())),
+          );
         },
         borderRadius: BorderRadius.circular(20),
         child: Container(
@@ -357,6 +351,150 @@ class ReviewsRow extends StatelessWidget {
         child: InkWell(
           onTap: () {
             print('widget a pressed');
+
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.grey.shade900,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              builder: (BuildContext context) {
+                return SingleChildScrollView(
+                  child: Container(
+                    padding: EdgeInsets.all(16.0),
+                    height: MediaQuery.of(context).size.height * 0.4,
+                    width: MediaQuery.of(context).size.width,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  'Reviews',
+                                  style: TextStyle(
+                                    fontSize: 35,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Container(
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.only(
+                                      left: 8, right: 8, top: 1, bottom: 1),
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white10,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(20)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        '21%',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      SizedBox(width: 3),
+                                      Icon(
+                                        Icons.arrow_upward_rounded,
+                                        size: 15,
+                                        color: Colors.white,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Icon(
+                              Icons.moving,
+                              size: 35,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 40),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '4.9',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 80,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Average\nRating',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Flexible(
+                              flex: 2,
+                              child: Column(
+                                children: [
+                                  for (int i = 5; i > 0; i--)
+                                    Row(
+                                      children: [
+                                        Text(
+                                          (i).toString(),
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                        Icon(Icons.star_rate_rounded,
+                                            size: 17, color: Colors.white54),
+                                        SizedBox(width: 5),
+                                        Container(
+                                          height: 4,
+                                          width: 150,
+                                          margin: EdgeInsets.only(
+                                              top: 10, bottom: 10),
+                                          child: LinearProgressIndicator(
+                                            backgroundColor: Colors.grey,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.orangeAccent),
+                                            value: 0.8,
+                                          ),
+                                        ),
+                                        SizedBox(width: 5),
+                                        Text(
+                                          '(534)',
+                                          style: TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                ],
+                              ),
+                            )
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
           },
           borderRadius: BorderRadius.circular(20),
           child: Container(
@@ -430,6 +568,11 @@ class OrdersPlacedRow extends StatelessWidget {
         child: InkWell(
           onTap: () {
             print('widget a pressed');
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => (OrderAnalytics())),
+            );
           },
           borderRadius: BorderRadius.circular(20),
           child: Container(
@@ -528,48 +671,42 @@ class ImpressionRow extends StatelessWidget {
         color: Colors.white10,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: InkWell(
-        onTap: () {
-          print('widget a pressed');
-        },
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 15),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                textDirection: TextDirection.rtl,
-                children: [
-                  const Text(
-                    'Impressions',
+      child: Container(
+        padding: EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              textDirection: TextDirection.rtl,
+              children: [
+                const Text(
+                  'Impressions',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
+                ),
+                Container(
+                  alignment: Alignment.bottomLeft,
+                  child: Text(
+                    '$impressions',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 45,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Container(
-                    alignment: Alignment.bottomLeft,
-                    child: Text(
-                      '$impressions',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 45,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Icon(
-                Icons.remove_red_eye,
-                size: 40,
-                color: Colors.white38,
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+            Icon(
+              Icons.remove_red_eye,
+              size: 40,
+              color: Colors.white38,
+            ),
+          ],
         ),
       ),
     );

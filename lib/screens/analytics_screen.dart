@@ -11,8 +11,8 @@ import '../graphs/piChart.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   static const String id = 'analytics_screen';
-  Restaurant restaurant;
-  AnalyticsScreen({super.key, required this.restaurant});
+  final Restaurant restaurant;
+  const AnalyticsScreen({super.key, required this.restaurant});
 
   @override
   State<AnalyticsScreen> createState() => _AnalyticsScreenState();

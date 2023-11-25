@@ -36,9 +36,9 @@ class MenuItem {
       required this.productID});
 }
 
-class _CartScreenState extends State<MenuScreen> {
-  late List<Category> itemList = [];
+late List<Category> itemList = [];
 
+class _CartScreenState extends State<MenuScreen> {
   int categoryExists(List<Category> temp, int categoryID) {
     for (int i = 0; i < temp.length; i++) {
       if (temp[i].categoryID == categoryID) {
@@ -144,7 +144,10 @@ class _CartScreenState extends State<MenuScreen> {
           ),
           Column(
             children: itemList.map((category) {
-              return CategoryWidget(disp: category);
+              return CategoryWidget(
+                disp: category,
+                restaurantID: widget.restaurant.restaurantID,
+              );
             }).toList(),
           ),
           SizedBox(
@@ -158,8 +161,9 @@ class _CartScreenState extends State<MenuScreen> {
 
 class CategoryWidget extends StatefulWidget {
   final Category disp;
+  final int restaurantID;
 
-  CategoryWidget({required this.disp});
+  CategoryWidget({required this.disp, required this.restaurantID});
 
   @override
   _CategoryWidgetState createState() => _CategoryWidgetState();
@@ -444,8 +448,9 @@ class _CategoryWidgetState extends State<CategoryWidget> {
           ),
           GestureDetector(
             onTap: () {
-              print('a');
-              AddMenuItemBottomSheet(context);
+              print('${widget.disp.categoryID}');
+              AddMenuItemBottomSheet(
+                  context, widget.disp.categoryID, widget.restaurantID);
             },
             child: Container(
               width: double.infinity,
@@ -483,7 +488,11 @@ class _CategoryWidgetState extends State<CategoryWidget> {
     );
   }
 
-  Future<dynamic> AddMenuItemBottomSheet(BuildContext context) {
+  Future<dynamic> AddMenuItemBottomSheet(
+      BuildContext context, int categoryID, int restaurantID) {
+    String foodName = '';
+    int price = -1;
+
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -515,6 +524,9 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                     hintText: 'Enter Food Name',
                     border: OutlineInputBorder(),
                   ),
+                  onChanged: (text) {
+                    foodName = text;
+                  },
                 ),
                 SizedBox(height: 16.0),
                 Text("Food Price:"),
@@ -524,10 +536,34 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                     hintText: 'Enter Food Price',
                     border: OutlineInputBorder(),
                   ),
+                  onChanged: (text) {
+                    try {
+                      int p = int.parse(text);
+                      price = p;
+                    } catch (e) {}
+                  },
                 ),
                 SizedBox(height: 25.0),
                 InkWell(
-                  onTap: () {},
+                  onTap: () async {
+                    if (foodName.isNotEmpty && price > 0) {
+                      var db = Mysql();
+                      int productID = await db.addProduct(
+                          foodName, restaurantID, categoryID, price);
+                      for (int i = 0; i < itemList.length; i++) {
+                        if (itemList[i].categoryID == categoryID) {
+                          setState(() {
+                            itemList[i].items.add(MenuItem(
+                                image: 'images/kfc.jpg',
+                                title: foodName,
+                                price: price,
+                                productID: productID));
+                          });
+                        }
+                      }
+                      Navigator.pop(context);
+                    }
+                  },
                   child: Container(
                     padding: EdgeInsets.only(top: 15, bottom: 15),
                     decoration: BoxDecoration(

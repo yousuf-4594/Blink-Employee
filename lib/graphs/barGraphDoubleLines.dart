@@ -1,10 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:food_delivery_restraunt/mysql.dart';
+import 'package:mysql_client/mysql_client.dart';
 
 class BarChartSample2 extends StatefulWidget {
-  BarChartSample2({super.key});
+  final int restaurantID;
+  BarChartSample2({super.key, required this.restaurantID});
   final Color leftBarColor = Colors.orange;
-  final Color rightBarColor = Colors.pinkAccent;
   final Color avgColor = Colors.greenAccent;
 
   @override
@@ -13,40 +15,90 @@ class BarChartSample2 extends StatefulWidget {
 
 class BarChartSample2State extends State<BarChartSample2> {
   final double width = 8;
-
-  late List<BarChartGroupData> rawBarGroups;
-  late List<BarChartGroupData> showingBarGroups;
+  late List<BarChartGroupData> rawBarGroups = [];
+  late List<BarChartGroupData> showingBarGroups = [];
 
   int touchedGroupIndex = -1;
+
+  // final barGroup1 = makeGroupData(x: 0, y1: 0); // 8-9
+  // final barGroup2 = makeGroupData(x: 0, y1: 0); // 9-10
+  // final barGroup3 = makeGroupData(x: 0, y1: 0); // 10-11
+  // final barGroup4 = makeGroupData(x: 0, y1: 0); // 11-12
+  // final barGroup5 = makeGroupData(x: 0, y1: 0); // 12-1
+  // final barGroup6 = makeGroupData(x: 0, y1: 0); // 1-2
+  // final barGroup7 = makeGroupData(x: 0, y1: 0); // 2-3
+  // final barGroup8 = makeGroupData(x: 0, y1: 0); // 3-4
+
+  late List<BarChartGroupData> items = [];
 
   @override
   void initState() {
     super.initState();
-    //               index, B1Val, B2Val
-    final barGroup1 = makeGroupData(0, 5, 12);
-    final barGroup2 = makeGroupData(1, 16, 12);
-    final barGroup3 = makeGroupData(2, 18, 5);
-    final barGroup4 = makeGroupData(3, 20, 16);
-    final barGroup5 = makeGroupData(4, 17, 6);
-    final barGroup6 = makeGroupData(5, 19, 1.5);
-    final barGroup7 = makeGroupData(6, 10, 1.5);
-    final barGroup8 = makeGroupData(7, 13, 4);
-
-    final items = [
-      barGroup1,
-      barGroup2,
-      barGroup3,
-      barGroup4,
-      barGroup5,
-      barGroup6,
-      barGroup7,
-      barGroup8,
-    ];
-    rawBarGroups = items;
-    showingBarGroups = rawBarGroups;
+    getSalesByTimeSlot();
   }
 
   String selectedValue = 'Today';
+
+  void getSalesByTimeSlot() async {
+    List<BarChartGroupData> temp = [];
+    var db = Mysql();
+    Iterable<ResultSetRow> rows = await db.getResults(
+        'SELECT TIME_FORMAT(placed_at, "%h") + 5 AS hour, SUM(price) AS price FROM Orders WHERE restaurant_id=${widget.restaurantID} AND (HOUR(placed_at) + 5) BETWEEN 8 AND 16 AND status="completed" GROUP BY hour;');
+    for (int i = 0; i < 8; i++) {
+      temp.add(BarChartGroupData(
+        barsSpace: 2,
+        x: i,
+        barRods: [
+          BarChartRodData(
+            toY: 0,
+            color: widget.leftBarColor,
+            width: width,
+          )
+        ],
+      ));
+    }
+    for (var row in rows) {
+      int hour = int.parse(row.assoc()['hour']!);
+      double price = double.parse(row.assoc()['price']!);
+      if (hour >= 8 && hour <= 12) {
+        temp.removeAt(hour - 8);
+        temp.insert(
+            hour - 8,
+            BarChartGroupData(
+              barsSpace: 2,
+              x: hour - 8,
+              barRods: [
+                BarChartRodData(
+                  toY: price / 1000,
+                  color: widget.leftBarColor,
+                  width: width,
+                )
+              ],
+            ));
+      } else if (hour >= 1 && hour <= 4) {
+        temp.removeAt(hour + 4);
+        temp.insert(
+            hour + 4,
+            BarChartGroupData(
+              barsSpace: 2,
+              x: hour + 4,
+              barRods: [
+                BarChartRodData(
+                  toY: price / 1000,
+                  color: widget.leftBarColor,
+                  width: width,
+                )
+              ],
+            ));
+      }
+    }
+
+    setState(() {
+      items = temp;
+      rawBarGroups = items;
+      showingBarGroups = rawBarGroups;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -234,7 +286,7 @@ class BarChartSample2State extends State<BarChartSample2> {
       style: const TextStyle(
         color: Color(0xff7589a2),
         fontWeight: FontWeight.bold,
-        fontSize: 14,
+        fontSize: 10,
       ),
     );
 
@@ -245,21 +297,16 @@ class BarChartSample2State extends State<BarChartSample2> {
     );
   }
 
-  BarChartGroupData makeGroupData(int x, double y1, double y2) {
+  BarChartGroupData makeGroupData({required int x, double y1 = 0.0}) {
     return BarChartGroupData(
-      barsSpace: 4,
+      barsSpace: 2,
       x: x,
       barRods: [
         BarChartRodData(
           toY: y1,
           color: widget.leftBarColor,
           width: width,
-        ),
-        BarChartRodData(
-          toY: y2,
-          color: widget.rightBarColor,
-          width: width,
-        ),
+        )
       ],
     );
   }

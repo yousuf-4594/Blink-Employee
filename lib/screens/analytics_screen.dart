@@ -88,7 +88,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           child: Column(
             children: <Widget>[
               ImpressionRow(impressions: impressions),
-              const TimeSlotSalesRow(),
+              TimeSlotSalesRow(
+                restaurantID: widget.restaurant.restaurantID,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -480,9 +482,8 @@ class OrdersPlacedRow extends StatelessWidget {
 }
 
 class TimeSlotSalesRow extends StatelessWidget {
-  const TimeSlotSalesRow({
-    super.key,
-  });
+  final int restaurantID;
+  const TimeSlotSalesRow({super.key, required this.restaurantID});
 
   @override
   Widget build(BuildContext context) {
@@ -501,7 +502,9 @@ class TimeSlotSalesRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: Container(
           padding: EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 15),
-          child: BarChartSample2(),
+          child: BarChartSample2(
+            restaurantID: restaurantID,
+          ),
         ),
       ),
     );

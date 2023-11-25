@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:food_delivery_restraunt/mysql.dart';
+import 'package:mysql_client/mysql_client.dart';
+
+import '../classes/restaurant.dart';
 
 class MenuScreen extends StatefulWidget {
-  const MenuScreen({super.key});
+  final Restaurant restaurant;
+  const MenuScreen({super.key, required this.restaurant});
 
   @override
   State<MenuScreen> createState() => _CartScreenState();
@@ -20,63 +25,68 @@ class Category {
 
 class MenuItem {
   final String image;
+  final int productID;
   final String title;
-  final String price;
+  final int price;
 
-  MenuItem({required this.image, required this.title, required this.price});
+  MenuItem(
+      {required this.image,
+      required this.title,
+      required this.price,
+      required this.productID});
 }
 
 class _CartScreenState extends State<MenuScreen> {
-  final itemList = [
-    Category(
-      categoryID: 2,
-      categoryName: 'Category 1',
-      items: [
-        MenuItem(
-          image: 'assets/icons/cancel.png',
-          title: 'Chicken mayo boti roll',
-          price: 'price',
-        ),
-        MenuItem(
-          image: 'assets/icons/cancel.png',
-          title: 'Biryani',
-          price: '120rs',
-        ),
-      ],
-    ),
-    Category(
-      categoryID: 3,
-      categoryName: 'Category 2',
-      items: [
-        MenuItem(
-          image: 'assets/icons/cancel.png',
-          title: 'Item 3',
-          price: '120rs',
-        ),
-        MenuItem(
-          image: 'assets/icons/cancel.png',
-          title: 'Item 1',
-          price: '120rs',
-        ),
-      ],
-    ),
-    Category(
-      categoryID: 1,
-      categoryName: 'Category 3',
-      items: [
-        MenuItem(
-          image: 'assets/icons/cancel.png',
-          title: 'Item 3',
-          price: '120rs',
-        ),
-        MenuItem(
-          image: 'assets/icons/cancel.png',
-          title: 'Item 1',
-          price: '120rs',
-        ),
-      ],
-    ),
-  ];
+  late List<Category> itemList = [];
+
+  int categoryExists(List<Category> temp, int categoryID) {
+    for (int i = 0; i < temp.length; i++) {
+      if (temp[i].categoryID == categoryID) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  void getCategory() async {
+    List<Category> temp = [];
+    var db = Mysql();
+    Iterable<ResultSetRow> rows = await db.getResults(
+        'SELECT P.product_id, P.name AS p_name, P.price, C.category_id, C.name AS c_name FROM Product P INNER JOIN Category C ON (P.category_id = C.category_id) WHERE P.restaurant_id=${widget.restaurant.restaurantID};');
+
+    for (var row in rows) {
+      int index = categoryExists(temp, int.parse(row.assoc()['category_id']!));
+      if (index >= 0) {
+        temp[index].items.add(MenuItem(
+            image: 'images/kfc.jpg',
+            title: row.assoc()['p_name']!,
+            price: int.parse(row.assoc()['price']!),
+            productID: int.parse(row.assoc()['product_id']!)));
+      } else {
+        temp.add(Category(
+            categoryName: row.assoc()['c_name']!,
+            items: <MenuItem>[],
+            categoryID: int.parse(row.assoc()['category_id']!)));
+        int i = categoryExists(temp, int.parse(row.assoc()['category_id']!));
+        temp[i].items.add(MenuItem(
+            image: 'images/kfc.jpg',
+            title: row.assoc()['p_name']!,
+            price: int.parse(row.assoc()['price']!),
+            productID: int.parse(row.assoc()['product_id']!)));
+      }
+    }
+
+    setState(() {
+      itemList = temp;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getCategory();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -229,7 +239,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
               TextEditingController namecontroller =
                   TextEditingController(text: item.title);
               TextEditingController pricecontroller =
-                  TextEditingController(text: item.price);
+                  TextEditingController(text: '${item.price}');
 
               if (isEditMode) {
                 return GestureDetector(
@@ -341,7 +351,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                           ),
                           Spacer(),
                           Text(
-                            item.price,
+                            '${item.price}',
                             style: TextStyle(
                               color: Colors.white,
                               // fontWeight: FontWeight.bold,
@@ -412,7 +422,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                               ),
                               Spacer(),
                               Text(
-                                item.price,
+                                '${item.price}',
                                 style: TextStyle(
                                   color: Colors.white,
                                   // fontWeight: FontWeight.bold,

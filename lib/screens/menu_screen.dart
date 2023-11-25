@@ -8,10 +8,14 @@ class MenuScreen extends StatefulWidget {
 }
 
 class Category {
+  final int categoryID;
   final String categoryName;
   final List<MenuItem> items;
 
-  Category({required this.categoryName, required this.items});
+  Category(
+      {required this.categoryName,
+      required this.items,
+      required this.categoryID});
 }
 
 class MenuItem {
@@ -25,6 +29,7 @@ class MenuItem {
 class _CartScreenState extends State<MenuScreen> {
   final itemList = [
     Category(
+      categoryID: 2,
       categoryName: 'Category 1',
       items: [
         MenuItem(
@@ -40,6 +45,7 @@ class _CartScreenState extends State<MenuScreen> {
       ],
     ),
     Category(
+      categoryID: 3,
       categoryName: 'Category 2',
       items: [
         MenuItem(
@@ -55,6 +61,7 @@ class _CartScreenState extends State<MenuScreen> {
       ],
     ),
     Category(
+      categoryID: 1,
       categoryName: 'Category 3',
       items: [
         MenuItem(

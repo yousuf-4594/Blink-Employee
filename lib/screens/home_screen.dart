@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/classes/order.dart';
 import 'package:food_delivery_restraunt/classes/restaurant.dart';
@@ -253,7 +255,21 @@ class _OrderListViewState extends State<OrderListView> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getOrders();
+    if (mounted) {
+      getOrders();
+      timer = Timer.periodic(
+          const Duration(seconds: 60), (Timer t) => setState(() {}));
+    } else {
+      timer.cancel();
+    }
+  }
+
+  late var timer;
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
   }
 
   @override

@@ -46,6 +46,7 @@ dependencies:
   mysql1: ^0.20.0
   mysql_client: ^0.0.27
   cached_network_image: ^3.2.3
+  fl_chart: ^0.64.0
 
 dev_dependencies:
   flutter_test:

@@ -50,4 +50,22 @@ class Mysql {
     }
     return productID;
   }
+
+  void updateOrderStatus(int orderID, String status) async {
+    var conn = await getConnection();
+    await conn.connect();
+    await conn
+        .execute('UPDATE Orders SET status="$status" WHERE order_id=$orderID');
+    await conn.close();
+  }
+
+  void deleteOrder(int orderID) async {
+    var conn = await getConnection();
+    await conn.connect();
+    await conn.transactional((conn) async {
+      await conn.execute("DELETE FROM OrderDetail WHERE order_id=$orderID");
+      await conn.execute("DELETE FROM Orders WHERE order_id=$orderID");
+    });
+    conn.close();
+  }
 }

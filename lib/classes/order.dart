@@ -4,7 +4,7 @@ import 'package:food_delivery_restraunt/classes/order_details.dart';
 
 class Order {
   final int orderID;
-  final String status;
+  late String status;
   final int price;
   late List<OrderDetails> orderDetails = [];
 
@@ -12,11 +12,11 @@ class Order {
     getOrderDetails(orderID);
   }
 
-  static Future<List<Order>> getOrders(int restaurantID) async {
+  static Future<List<Order>> getPendingOrders(int restaurantID) async {
     List<Order> orders = [];
     var db = Mysql();
-    Iterable<ResultSetRow> rows = await db
-        .getResults('SELECT * FROM Orders WHERE restaurant_id=$restaurantID');
+    Iterable<ResultSetRow> rows = await db.getResults(
+        'SELECT * FROM Orders WHERE restaurant_id=$restaurantID AND status <> "completed"');
     if (rows.isNotEmpty) {
       for (var row in rows) {
         orders.add(Order(

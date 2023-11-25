@@ -7,6 +7,8 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
 
+import 'package:food_delivery_restraunt/mysql.dart';
+
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
   int loginID = -1;
@@ -243,7 +245,7 @@ class _OrderListViewState extends State<OrderListView> {
   late List<Order> orders = [];
 
   void getOrders() async {
-    List<Order> tempOrders = await Order.getOrders(widget.restaurantID);
+    List<Order> tempOrders = await Order.getPendingOrders(widget.restaurantID);
     if (this.mounted) {
       setState(() {
         orders = tempOrders;
@@ -288,17 +290,57 @@ class _OrderListViewState extends State<OrderListView> {
             endActionPane: ActionPane(
               motion: const ScrollMotion(),
               children: [
-                SlidableAction(
-                  onPressed: (context) {
-                    setState(() {
-                      orders.removeAt(index);
-                    });
-                  },
-                  autoClose: true,
-                  borderRadius: BorderRadius.circular(20),
-                  backgroundColor: Colors.red,
-                  icon: Icons.delete,
-                ),
+                orders[index].status == 'pending'
+                    ? SlidableAction(
+                        onPressed: (context) {
+                          var db = Mysql();
+                          db.deleteOrder(orders[index].orderID);
+                          setState(() {
+                            orders.removeAt(index);
+                          });
+                        },
+                        autoClose: true,
+                        borderRadius: BorderRadius.circular(20),
+                        backgroundColor: Colors.red,
+                        icon: Icons.delete,
+                      )
+                    : Container(),
+                orders[index].status == 'pending'
+                    ? SlidableAction(
+                        onPressed: (context) {
+                          setState(() {
+                            // orders.removeAt(index);
+                            var db = Mysql();
+                            db.updateOrderStatus(
+                                orders[index].orderID, "processing");
+                            setState(() {
+                              orders[index].status = 'processing';
+                            });
+                          });
+                        },
+                        autoClose: true,
+                        borderRadius: BorderRadius.circular(20),
+                        backgroundColor: Colors.green,
+                        icon: Icons.add,
+                      )
+                    : SlidableAction(
+                        onPressed: (context) {
+                          setState(() {
+                            // orders.removeAt(index);
+                            var db = Mysql();
+                            db.updateOrderStatus(
+                                orders[index].orderID, "completed");
+                            setState(() {
+                              orders[index].status = 'completed';
+                              orders.removeAt(index);
+                            });
+                          });
+                        },
+                        autoClose: true,
+                        borderRadius: BorderRadius.circular(20),
+                        backgroundColor: Colors.green,
+                        icon: Icons.add,
+                      ),
                 // GestureDetector(
                 //   onTap: () {
                 //     setState(() {

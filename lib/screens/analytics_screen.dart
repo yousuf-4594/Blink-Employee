@@ -337,46 +337,130 @@ class ReviewsRow extends StatelessWidget {
                 return SingleChildScrollView(
                   child: Container(
                     padding: EdgeInsets.all(16.0),
-                    height: MediaQuery.of(context).size.height * 0.7,
+                    height: MediaQuery.of(context).size.height * 0.4,
                     width: MediaQuery.of(context).size.width,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Reviews',
-                              style: TextStyle(
-                                fontSize: 35,
-                                color: Colors.white,
-                              ),
+                            Row(
+                              children: [
+                                Text(
+                                  'Reviews',
+                                  style: TextStyle(
+                                    fontSize: 35,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Container(
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.only(
+                                      left: 8, right: 8, top: 1, bottom: 1),
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white10,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(20)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        '21%',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      SizedBox(width: 3),
+                                      Icon(
+                                        Icons.arrow_upward_rounded,
+                                        size: 15,
+                                        color: Colors.white,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            SizedBox(width: 10),
-                            Container(
-                              alignment: Alignment.center,
-                              padding: EdgeInsets.only(
-                                  left: 5, right: 5, top: 1, bottom: 1),
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: Colors.white10,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20)),
-                              ),
-                              child: Row(
+                            Icon(
+                              Icons.moving,
+                              size: 35,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 40),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '21%',
-                                    style: TextStyle(color: Colors.pink),
+                                    '4.9',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 80,
+                                    ),
                                   ),
-                                  SizedBox(width: 3),
-                                  Icon(
-                                    Icons.arrow_upward_rounded,
-                                    size: 20,
-                                    color: Colors.amber,
+                                  Text(
+                                    'Average\nRating',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 18,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
+                            Flexible(
+                              flex: 2,
+                              child: Column(
+                                children: [
+                                  for (int i = 5; i > 0; i--)
+                                    Row(
+                                      children: [
+                                        Text(
+                                          (i).toString(),
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                        Icon(Icons.star_rate_rounded,
+                                            size: 17, color: Colors.white54),
+                                        SizedBox(width: 5),
+                                        Container(
+                                          height: 4,
+                                          width: 150,
+                                          margin: EdgeInsets.only(
+                                              top: 10, bottom: 10),
+                                          child: LinearProgressIndicator(
+                                            backgroundColor: Colors.grey,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.orangeAccent),
+                                            value: 0.8,
+                                          ),
+                                        ),
+                                        SizedBox(width: 5),
+                                        Text(
+                                          '(534)',
+                                          style: TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                ],
+                              ),
+                            )
                           ],
                         )
                       ],

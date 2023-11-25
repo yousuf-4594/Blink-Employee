@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:food_delivery_restraunt/screens/orderPlaceScreen.dart';
 import 'package:food_delivery_restraunt/screens/revenueScreen.dart';
 import 'package:food_delivery_restraunt/services/analytics.dart';
 
@@ -549,6 +550,11 @@ class OrdersPlacedRow extends StatelessWidget {
         child: InkWell(
           onTap: () {
             print('widget a pressed');
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => (OrderAnalytics())),
+            );
           },
           borderRadius: BorderRadius.circular(20),
           child: Container(

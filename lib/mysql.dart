@@ -1,3 +1,8 @@
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+import 'package:food_delivery_restraunt/classes/CategorySales.dart';
+import 'package:food_delivery_restraunt/classes/PopularFood.dart';
 import 'package:mysql_client/mysql_client.dart';
 
 class Mysql {
@@ -67,5 +72,55 @@ class Mysql {
       await conn.execute("DELETE FROM Orders WHERE order_id=$orderID");
     });
     conn.close();
+  }
+
+  Future<List<CategorySales>> getCategorySales(int restaurantID) async {
+    List<CategorySales> temp = [];
+    List<Color> colors = [
+      Colors.red,
+      Colors.green,
+      Colors.blue,
+      Colors.yellow,
+      Colors.orange,
+      Colors.teal,
+      Colors.purple,
+      Colors.pink,
+      Colors.indigo,
+      Colors.lightGreenAccent
+    ];
+    var db = Mysql();
+    Iterable<ResultSetRow> rows = await db.getResults(
+        'SELECT C.category_id, C.name, ROUND((SUM(P.price * D.quantity)/(SELECT SUM(PRICE) FROM Orders WHERE restaurant_id=$restaurantID AND status="completed")) * 100) AS percentage FROM Orders O INNER JOIN OrderDetail D ON (O.order_id = D.order_id) INNER JOIN Product P ON (D.product_id = P.product_id) INNER JOIN Category C ON (P.category_id = C.category_id) WHERE O.restaurant_id=$restaurantID AND O.status = "completed" GROUP BY category_id, name;');
+    if (rows.length > 0) {
+      for (var row in rows) {
+        temp.add(CategorySales(
+            categoryID: int.parse(row.assoc()['category_id']!),
+            categoryName: row.assoc()['name']!,
+            percentage: int.parse(row.assoc()['percentage']!),
+            color: Colors.red));
+      }
+    }
+    for (int i = 0; i < temp.length; i++) {
+      temp[i].color = colors[i];
+    }
+
+    return temp;
+  }
+
+  Future<List<PopularFood>> getPopularFood(int restaurantID) async {
+    List<PopularFood> foods = [];
+    var db = Mysql();
+    Iterable<ResultSetRow> rows = await db.getResults(
+        'SELECT D.product_id, P.name, SUM(D.quantity) AS quantity FROM Orders O INNER JOIN OrderDetail D ON (O.order_id = D.order_id) INNER JOIN Product P ON (D.product_id = P.product_id) WHERE O.restaurant_id=$restaurantID AND O.status="completed" GROUP BY D.product_id, P.name ORDER BY SUM(D.quantity) DESC LIMIT 3;');
+
+    if (rows.length > 0) {
+      for (var row in rows) {
+        foods.add(PopularFood(
+            productID: int.parse(row.assoc()['product_id']!),
+            productName: row.assoc()['name']!,
+            quantity: int.parse(row.assoc()['quantity']!)));
+      }
+    }
+    return foods;
   }
 }

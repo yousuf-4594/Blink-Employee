@@ -1,28 +1,22 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:food_delivery_restraunt/classes/PopularFood.dart';
+import 'package:food_delivery_restraunt/mysql.dart';
 import 'package:food_delivery_restraunt/screens/orderPlaceScreen.dart';
 import 'package:food_delivery_restraunt/screens/revenueScreen.dart';
 import 'package:food_delivery_restraunt/services/analytics.dart';
 
-import 'package:fl_chart/fl_chart.dart';
-
 import '../classes/restaurant.dart';
 import '../graphs/barGraphDoubleLines.dart';
 import '../graphs/piChart.dart';
-import '../graphs/revenueLineChart.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   static const String id = 'analytics_screen';
-  Restaurant restaurant;
-  AnalyticsScreen({super.key, required this.restaurant});
+  final Restaurant restaurant;
+  const AnalyticsScreen({super.key, required this.restaurant});
 
   @override
   State<AnalyticsScreen> createState() => _AnalyticsScreenState();
 }
-
-// A good fl_chart graph library explanation
-// https://www.youtube.com/watch?v=MFvq0MdeKcI
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
   int ordersPlaced = 0;
@@ -41,23 +35,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     });
   }
 
-  late var timer;
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    if (mounted) {
-      getAnalytics(widget.restaurant.restaurantID);
-      timer = Timer.periodic(
-          const Duration(seconds: 60), (Timer t) => setState(() {}));
-    }
-  }
-
-  @override
-  void dispose() {
-    timer.cancel();
-    super.dispose();
+    getAnalytics(widget.restaurant.restaurantID);
   }
 
   @override
@@ -68,7 +50,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           preferredSize: Size.fromHeight(60.0),
           child: AppBar(
             automaticallyImplyLeading: false,
-            title: const Text(
+            title: Text(
               'Dhaba',
               style: TextStyle(
                 fontSize: 50,
@@ -76,7 +58,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               ),
             ),
             backgroundColor: Colors.black,
-            shape: const RoundedRectangleBorder(
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () {
+                  print("Change vendor name right now");
+                },
+              ),
+            ],
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(
                 bottom: Radius.circular(20.0),
               ),
@@ -85,11 +75,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         ),
         body: SafeArea(
             child: SingleChildScrollView(
-          physics: BouncingScrollPhysics(),
           child: Column(
             children: <Widget>[
               ImpressionRow(impressions: impressions),
-              const TimeSlotSalesRow(),
+              TimeSlotSalesRow(
+                restaurantID: widget.restaurant.restaurantID,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -98,10 +89,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 ],
               ),
               RevenueRow(revenue: revenue),
-              const Row(
+              Row(
                 children: [
-                  PopularRow(),
-                  piChartRow(),
+                  PopularRow(
+                    restaurantID: widget.restaurant.restaurantID,
+                  ),
+                  piChartRow(
+                    restaurantID: widget.restaurant.restaurantID,
+                  ),
                 ],
               ),
               SizedBox(height: 80),
@@ -112,9 +107,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 }
 
 class piChartRow extends StatelessWidget {
-  const piChartRow({
-    super.key,
-  });
+  final int restaurantID;
+  piChartRow({super.key, required this.restaurantID});
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +131,7 @@ class piChartRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'sales by categories %',
                   style: TextStyle(
                     color: Colors.white,
@@ -146,7 +140,9 @@ class piChartRow extends StatelessWidget {
                 ),
                 Expanded(
                   child: Container(
-                    child: PieChartSample(),
+                    child: PieChartSample(
+                      restaurantID: restaurantID,
+                    ),
                   ),
                 ),
               ],
@@ -158,10 +154,81 @@ class piChartRow extends StatelessWidget {
   }
 }
 
-class PopularRow extends StatelessWidget {
-  const PopularRow({
-    super.key,
-  });
+class PopularRow extends StatefulWidget {
+  final int restaurantID;
+  const PopularRow({super.key, required this.restaurantID});
+
+  @override
+  State<PopularRow> createState() => _PopularRowState();
+}
+
+class _PopularRowState extends State<PopularRow> {
+  List<Container> foods = [];
+
+  void getPopularFood() async {
+    List<PopularFood> temp = [];
+    List<Container> containers = [
+      Container(
+        margin: EdgeInsets.only(left: 10, bottom: 20, top: 10),
+        child: Text('Popular',
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            )),
+      )
+    ];
+    var db = Mysql();
+    temp = await db.getPopularFood(widget.restaurantID);
+    for (int i = 0; i < temp.length; i++) {
+      containers.add(Container(
+        height: 245 / 3,
+        child: Column(
+          children: [
+            Container(
+              height: 1,
+              decoration: BoxDecoration(color: Colors.white30),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              children: [
+                SizedBox(
+                  width: 5,
+                ),
+                Icon(
+                  Icons.ac_unit_rounded,
+                  color: Colors.white38,
+                  size: 20,
+                ),
+                SizedBox(
+                  width: 5,
+                ),
+                Text(
+                  '${temp[i].productName}',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ));
+    }
+    setState(() {
+      foods = containers;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getPopularFood();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,59 +246,11 @@ class PopularRow extends StatelessWidget {
           },
           borderRadius: BorderRadius.circular(20),
           child: Container(
-            padding: EdgeInsets.all(3),
+            padding: EdgeInsets.all(2),
             child: Column(
-              textDirection: TextDirection.rtl,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(left: 10, bottom: 20, top: 10),
-                  child: Text('Popular',
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      )),
-                ),
-                for (int i = 0; i < 3; i++)
-                  Container(
-                    height: 245 / 3,
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 1,
-                          decoration: BoxDecoration(color: Colors.white30),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Icon(
-                              Icons.ac_unit_rounded,
-                              color: Colors.white38,
-                              size: 20,
-                            ),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              'food $i',
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
+                textDirection: TextDirection.rtl,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: foods),
           ),
         ),
       ),
@@ -607,9 +626,8 @@ class OrdersPlacedRow extends StatelessWidget {
 }
 
 class TimeSlotSalesRow extends StatelessWidget {
-  const TimeSlotSalesRow({
-    super.key,
-  });
+  final int restaurantID;
+  const TimeSlotSalesRow({super.key, required this.restaurantID});
 
   @override
   Widget build(BuildContext context) {
@@ -621,9 +639,17 @@ class TimeSlotSalesRow extends StatelessWidget {
         color: Colors.white10,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Container(
-        padding: EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 15),
-        child: BarChartSample2(),
+      child: InkWell(
+        onTap: () {
+          print('widget a pressed');
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 15),
+          child: BarChartSample2(
+            restaurantID: restaurantID,
+          ),
+        ),
       ),
     );
   }

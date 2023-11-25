@@ -120,7 +120,7 @@ class piChartRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'sales by categories %',
                   style: TextStyle(
                     color: Colors.white,
@@ -311,6 +311,66 @@ class ReviewsRow extends StatelessWidget {
         child: InkWell(
           onTap: () {
             print('widget a pressed');
+
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.grey.shade900,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              builder: (BuildContext context) {
+                return SingleChildScrollView(
+                  child: Container(
+                    padding: EdgeInsets.all(16.0),
+                    height: MediaQuery.of(context).size.height * 0.7,
+                    width: MediaQuery.of(context).size.width,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'Reviews',
+                              style: TextStyle(
+                                fontSize: 35,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Container(
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.only(
+                                  left: 5, right: 5, top: 1, bottom: 1),
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: Colors.white10,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    '21%',
+                                    style: TextStyle(color: Colors.pink),
+                                  ),
+                                  SizedBox(width: 3),
+                                  Icon(
+                                    Icons.arrow_upward_rounded,
+                                    size: 20,
+                                    color: Colors.amber,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
           },
           borderRadius: BorderRadius.circular(20),
           child: Container(
@@ -450,15 +510,9 @@ class TimeSlotSalesRow extends StatelessWidget {
         color: Colors.white10,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: InkWell(
-        onTap: () {
-          print('widget a pressed');
-        },
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 15),
-          child: BarChartSample2(),
-        ),
+      child: Container(
+        padding: EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 15),
+        child: BarChartSample2(),
       ),
     );
   }
@@ -481,48 +535,42 @@ class ImpressionRow extends StatelessWidget {
         color: Colors.white10,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: InkWell(
-        onTap: () {
-          print('widget a pressed');
-        },
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 15),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                textDirection: TextDirection.rtl,
-                children: [
-                  const Text(
-                    'Impressions',
+      child: Container(
+        padding: EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              textDirection: TextDirection.rtl,
+              children: [
+                const Text(
+                  'Impressions',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
+                ),
+                Container(
+                  alignment: Alignment.bottomLeft,
+                  child: Text(
+                    '$impressions',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 45,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Container(
-                    alignment: Alignment.bottomLeft,
-                    child: Text(
-                      '$impressions',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 45,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Icon(
-                Icons.remove_red_eye,
-                size: 40,
-                color: Colors.white38,
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+            Icon(
+              Icons.remove_red_eye,
+              size: 40,
+              color: Colors.white38,
+            ),
+          ],
         ),
       ),
     );

@@ -3,6 +3,7 @@ import 'package:food_delivery_restraunt/components/setting_switch.dart';
 import 'package:food_delivery_restraunt/components/title_button.dart';
 
 import '../graphs/barGraphDoubleLines.dart';
+import '../graphs/piChart.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const String id = 'settings_screen';
@@ -101,7 +102,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Navigator.pop(context);
                     },
                   ),
-                  
                 ],
               )
             ],

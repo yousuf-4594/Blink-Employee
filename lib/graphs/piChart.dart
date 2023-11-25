@@ -1,15 +1,52 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:food_delivery_restraunt/mysql.dart';
+
+import '../classes/CategorySales.dart';
 
 class PieChartSample extends StatefulWidget {
-  const PieChartSample({super.key});
+  final int restaurantID;
+  const PieChartSample({super.key, required this.restaurantID});
 
   @override
-  State<StatefulWidget> createState() => PieChart2State();
+  State<StatefulWidget> createState() =>
+      PieChart2State(restaurantID: restaurantID);
 }
 
 class PieChart2State extends State {
   int touchedIndex = -1;
+  List<Indicator> categorySalesIndicator = [];
+  final int restaurantID;
+
+  PieChart2State({required this.restaurantID});
+
+  void getCategorySales() async {
+    var db = Mysql();
+    List<CategorySales> temp;
+    List<Indicator> indicators = [];
+    temp = await db.getCategorySales(restaurantID);
+    for (int i = 0; i < temp.length; i++) {
+      indicators.add(
+        Indicator(
+          color: temp[i].color,
+          text: temp[i].categoryName,
+          isSquare: false,
+          textColor: Colors.white,
+          percentage: temp[i].percentage,
+        ),
+      );
+    }
+    setState(() {
+      categorySalesIndicator = indicators;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getCategorySales();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,46 +88,13 @@ class PieChart2State extends State {
             ),
           ),
           SizedBox(height: 20),
-          const Row(
+          Row(
             // mainAxisAlignment: MainAxisAlignment.start,
             // crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Indicator(
-                    color: Colors.deepOrangeAccent,
-                    text: 'Rolls',
-                    isSquare: false,
-                    textColor: Colors.white,
-                  ),
-                  SizedBox(height: 4),
-                  Indicator(
-                    color: Colors.tealAccent,
-                    text: 'Fastfood',
-                    isSquare: false,
-                    textColor: Colors.white,
-                  ),
-                ],
-              ),
-              SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Indicator(
-                    color: Colors.redAccent,
-                    text: 'Beverages',
-                    isSquare: false,
-                    textColor: Colors.white,
-                  ),
-                  SizedBox(height: 4),
-                  Indicator(
-                    color: Colors.purple,
-                    text: 'Desi',
-                    isSquare: false,
-                    textColor: Colors.white,
-                  ),
-                ],
+                children: categorySalesIndicator,
               ),
             ],
           ),
@@ -100,81 +104,41 @@ class PieChart2State extends State {
   }
 
   List<PieChartSectionData> showingSections() {
-    return List.generate(4, (i) {
+    return List.generate(categorySalesIndicator.length, (i) {
       final isTouched = i == touchedIndex;
       final fontSize = isTouched ? 25.0 : 16.0;
       final radius = isTouched ? 60.0 : 50.0;
       const shadows = [Shadow(color: Colors.black, blurRadius: 2)];
-      switch (i) {
-        case 0:
-          return PieChartSectionData(
-            color: Colors.deepOrangeAccent,
-            value: 40,
-            title: '40%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.black54,
-            ),
-          );
-        case 1:
-          return PieChartSectionData(
-            color: Colors.tealAccent,
-            value: 30,
-            title: '30%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.black54,
-            ),
-          );
-        case 2:
-          return PieChartSectionData(
-            color: Colors.redAccent,
-            value: 15,
-            title: '15%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.black54,
-            ),
-          );
-        case 3:
-          return PieChartSectionData(
-            color: Colors.purple,
-            value: 15,
-            title: '15%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.black54,
-            ),
-          );
-        default:
-          throw Error();
-      }
+      return PieChartSectionData(
+        color: categorySalesIndicator[i].color,
+        value: double.parse('${categorySalesIndicator[i].percentage}'),
+        title: '${categorySalesIndicator[i].percentage}',
+        radius: radius,
+        titleStyle: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+          color: Colors.black54,
+        ),
+      );
     });
   }
 }
 
 class Indicator extends StatelessWidget {
-  const Indicator({
-    super.key,
-    required this.color,
-    required this.text,
-    required this.isSquare,
-    this.size = 16,
-    this.textColor,
-  });
+  const Indicator(
+      {super.key,
+      required this.color,
+      required this.text,
+      required this.isSquare,
+      this.size = 16,
+      this.textColor,
+      required this.percentage});
   final Color color;
   final String text;
   final bool isSquare;
   final double size;
   final Color? textColor;
+  final int percentage;
 
   @override
   Widget build(BuildContext context) {

@@ -95,10 +95,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 ],
               ),
               RevenueRow(revenue: revenue),
-              const Row(
+              Row(
                 children: [
                   PopularRow(),
-                  piChartRow(),
+                  piChartRow(
+                    restaurantID: widget.restaurant.restaurantID,
+                  ),
                 ],
               ),
               SizedBox(height: 80),
@@ -109,9 +111,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 }
 
 class piChartRow extends StatelessWidget {
-  const piChartRow({
-    super.key,
-  });
+  final int restaurantID;
+  piChartRow({super.key, required this.restaurantID});
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +144,9 @@ class piChartRow extends StatelessWidget {
                 ),
                 Expanded(
                   child: Container(
-                    child: PieChartSample(),
+                    child: PieChartSample(
+                      restaurantID: restaurantID,
+                    ),
                   ),
                 ),
               ],

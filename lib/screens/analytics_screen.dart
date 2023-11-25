@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/services/analytics.dart';
 
@@ -36,11 +38,23 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     });
   }
 
+  late var timer;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getAnalytics(widget.restaurant.restaurantID);
+    if (mounted) {
+      getAnalytics(widget.restaurant.restaurantID);
+      timer = Timer.periodic(
+          const Duration(seconds: 60), (Timer t) => setState(() {}));
+    }
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
   }
 
   @override

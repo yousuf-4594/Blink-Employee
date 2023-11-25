@@ -1,75 +1,92 @@
 import 'package:flutter/material.dart';
+import 'package:food_delivery_restraunt/mysql.dart';
+import 'package:mysql_client/mysql_client.dart';
+
+import '../classes/restaurant.dart';
 
 class MenuScreen extends StatefulWidget {
-  const MenuScreen({super.key});
+  final Restaurant restaurant;
+  const MenuScreen({super.key, required this.restaurant});
 
   @override
   State<MenuScreen> createState() => _CartScreenState();
 }
 
 class Category {
+  final int categoryID;
   final String categoryName;
   final List<MenuItem> items;
 
-  Category({required this.categoryName, required this.items});
+  Category(
+      {required this.categoryName,
+      required this.items,
+      required this.categoryID});
 }
 
 class MenuItem {
   final String image;
+  final int productID;
   final String title;
-  final String price;
+  final int price;
 
-  MenuItem({required this.image, required this.title, required this.price});
+  MenuItem(
+      {required this.image,
+      required this.title,
+      required this.price,
+      required this.productID});
 }
 
+late List<Category> itemList = [];
+
 class _CartScreenState extends State<MenuScreen> {
-  final itemList = [
-    Category(
-      categoryName: 'Category 1',
-      items: [
-        MenuItem(
-          image: 'assets/icons/cancel.png',
-          title: 'Chicken mayo boti roll',
-          price: 'price',
-        ),
-        MenuItem(
-          image: 'assets/icons/cancel.png',
-          title: 'Biryani',
-          price: '120rs',
-        ),
-      ],
-    ),
-    Category(
-      categoryName: 'Category 2',
-      items: [
-        MenuItem(
-          image: 'assets/icons/cancel.png',
-          title: 'Item 3',
-          price: '120rs',
-        ),
-        MenuItem(
-          image: 'assets/icons/cancel.png',
-          title: 'Item 1',
-          price: '120rs',
-        ),
-      ],
-    ),
-    Category(
-      categoryName: 'Category 3',
-      items: [
-        MenuItem(
-          image: 'assets/icons/cancel.png',
-          title: 'Item 3',
-          price: '120rs',
-        ),
-        MenuItem(
-          image: 'assets/icons/cancel.png',
-          title: 'Item 1',
-          price: '120rs',
-        ),
-      ],
-    ),
-  ];
+  int categoryExists(List<Category> temp, int categoryID) {
+    for (int i = 0; i < temp.length; i++) {
+      if (temp[i].categoryID == categoryID) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  void getCategory() async {
+    List<Category> temp = [];
+    var db = Mysql();
+    Iterable<ResultSetRow> rows = await db.getResults(
+        'SELECT P.product_id, P.name AS p_name, P.price, C.category_id, C.name AS c_name FROM Product P INNER JOIN Category C ON (P.category_id = C.category_id) WHERE P.restaurant_id=${widget.restaurant.restaurantID};');
+
+    for (var row in rows) {
+      int index = categoryExists(temp, int.parse(row.assoc()['category_id']!));
+      if (index >= 0) {
+        temp[index].items.add(MenuItem(
+            image: 'images/kfc.jpg',
+            title: row.assoc()['p_name']!,
+            price: int.parse(row.assoc()['price']!),
+            productID: int.parse(row.assoc()['product_id']!)));
+      } else {
+        temp.add(Category(
+            categoryName: row.assoc()['c_name']!,
+            items: <MenuItem>[],
+            categoryID: int.parse(row.assoc()['category_id']!)));
+        int i = categoryExists(temp, int.parse(row.assoc()['category_id']!));
+        temp[i].items.add(MenuItem(
+            image: 'images/kfc.jpg',
+            title: row.assoc()['p_name']!,
+            price: int.parse(row.assoc()['price']!),
+            productID: int.parse(row.assoc()['product_id']!)));
+      }
+    }
+
+    setState(() {
+      itemList = temp;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getCategory();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +144,10 @@ class _CartScreenState extends State<MenuScreen> {
           ),
           Column(
             children: itemList.map((category) {
-              return CategoryWidget(disp: category);
+              return CategoryWidget(
+                disp: category,
+                restaurantID: widget.restaurant.restaurantID,
+              );
             }).toList(),
           ),
           SizedBox(
@@ -141,8 +161,9 @@ class _CartScreenState extends State<MenuScreen> {
 
 class CategoryWidget extends StatefulWidget {
   final Category disp;
+  final int restaurantID;
 
-  CategoryWidget({required this.disp});
+  CategoryWidget({required this.disp, required this.restaurantID});
 
   @override
   _CategoryWidgetState createState() => _CategoryWidgetState();
@@ -222,7 +243,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
               TextEditingController namecontroller =
                   TextEditingController(text: item.title);
               TextEditingController pricecontroller =
-                  TextEditingController(text: item.price);
+                  TextEditingController(text: '${item.price}');
 
               if (isEditMode) {
                 return GestureDetector(
@@ -334,7 +355,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                           ),
                           Spacer(),
                           Text(
-                            item.price,
+                            '${item.price}',
                             style: TextStyle(
                               color: Colors.white,
                               // fontWeight: FontWeight.bold,
@@ -405,7 +426,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                               ),
                               Spacer(),
                               Text(
-                                item.price,
+                                '${item.price}',
                                 style: TextStyle(
                                   color: Colors.white,
                                   // fontWeight: FontWeight.bold,
@@ -427,8 +448,9 @@ class _CategoryWidgetState extends State<CategoryWidget> {
           ),
           GestureDetector(
             onTap: () {
-              print('a');
-              AddMenuItemBottomSheet(context);
+              print('${widget.disp.categoryID}');
+              AddMenuItemBottomSheet(
+                  context, widget.disp.categoryID, widget.restaurantID);
             },
             child: Container(
               width: double.infinity,
@@ -466,7 +488,11 @@ class _CategoryWidgetState extends State<CategoryWidget> {
     );
   }
 
-  Future<dynamic> AddMenuItemBottomSheet(BuildContext context) {
+  Future<dynamic> AddMenuItemBottomSheet(
+      BuildContext context, int categoryID, int restaurantID) {
+    String foodName = '';
+    int price = -1;
+
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -498,6 +524,9 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                     hintText: 'Enter Food Name',
                     border: OutlineInputBorder(),
                   ),
+                  onChanged: (text) {
+                    foodName = text;
+                  },
                 ),
                 SizedBox(height: 16.0),
                 Text("Food Price:"),
@@ -507,10 +536,34 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                     hintText: 'Enter Food Price',
                     border: OutlineInputBorder(),
                   ),
+                  onChanged: (text) {
+                    try {
+                      int p = int.parse(text);
+                      price = p;
+                    } catch (e) {}
+                  },
                 ),
                 SizedBox(height: 25.0),
                 InkWell(
-                  onTap: () {},
+                  onTap: () async {
+                    if (foodName.isNotEmpty && price > 0) {
+                      var db = Mysql();
+                      int productID = await db.addProduct(
+                          foodName, restaurantID, categoryID, price);
+                      for (int i = 0; i < itemList.length; i++) {
+                        if (itemList[i].categoryID == categoryID) {
+                          setState(() {
+                            itemList[i].items.add(MenuItem(
+                                image: 'images/kfc.jpg',
+                                title: foodName,
+                                price: price,
+                                productID: productID));
+                          });
+                        }
+                      }
+                      Navigator.pop(context);
+                    }
+                  },
                   child: Container(
                     padding: EdgeInsets.only(top: 15, bottom: 15),
                     decoration: BoxDecoration(

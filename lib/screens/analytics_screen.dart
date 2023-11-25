@@ -38,7 +38,36 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(60.0),
+        child: AppBar(
+          automaticallyImplyLeading: false,
+          title: Text(
+            'Dhaba',
+            style: TextStyle(
+              fontSize: 50,
+              fontFamily: 'Britanic',
+            ),
+          ),
+          backgroundColor: Colors.black,
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: () {
+                print("Change vendor name right now");
+              },
+            ),
+          ],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(20.0),
+            ),
+          ),
+        ),
+      ),
+     body: SafeArea(
         child: SingleChildScrollView(
       child: Column(
         children: <Widget>[
@@ -434,6 +463,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           )
         ],
       ),
-    ));
+    )));
   }
 }

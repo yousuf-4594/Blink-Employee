@@ -464,7 +464,7 @@ class ReviewsRow extends StatelessWidget {
                                         SizedBox(width: 5),
                                         Container(
                                           height: 4,
-                                          width: 150,
+                                          width: 135,
                                           margin: EdgeInsets.only(
                                               top: 10, bottom: 10),
                                           child: LinearProgressIndicator(

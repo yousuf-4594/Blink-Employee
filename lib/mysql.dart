@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/classes/CategorySales.dart';
+import 'package:food_delivery_restraunt/classes/PopularFood.dart';
 import 'package:mysql_client/mysql_client.dart';
 
 class Mysql {
@@ -104,5 +105,22 @@ class Mysql {
     }
 
     return temp;
+  }
+
+  Future<List<PopularFood>> getPopularFood(int restaurantID) async {
+    List<PopularFood> foods = [];
+    var db = Mysql();
+    Iterable<ResultSetRow> rows = await db.getResults(
+        'SELECT D.product_id, P.name, SUM(D.quantity) AS quantity FROM Orders O INNER JOIN OrderDetail D ON (O.order_id = D.order_id) INNER JOIN Product P ON (D.product_id = P.product_id) WHERE O.restaurant_id=$restaurantID AND O.status="completed" GROUP BY D.product_id, P.name ORDER BY SUM(D.quantity) DESC LIMIT 3;');
+
+    if (rows.length > 0) {
+      for (var row in rows) {
+        foods.add(PopularFood(
+            productID: int.parse(row.assoc()['product_id']!),
+            productName: row.assoc()['name']!,
+            quantity: int.parse(row.assoc()['quantity']!)));
+      }
+    }
+    return foods;
   }
 }

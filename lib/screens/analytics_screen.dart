@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:food_delivery_restraunt/classes/PopularFood.dart';
+import 'package:food_delivery_restraunt/mysql.dart';
 import 'package:food_delivery_restraunt/services/analytics.dart';
 
 import 'package:fl_chart/fl_chart.dart';
@@ -97,7 +99,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               RevenueRow(revenue: revenue),
               Row(
                 children: [
-                  PopularRow(),
+                  PopularRow(
+                    restaurantID: widget.restaurant.restaurantID,
+                  ),
                   piChartRow(
                     restaurantID: widget.restaurant.restaurantID,
                   ),
@@ -158,10 +162,81 @@ class piChartRow extends StatelessWidget {
   }
 }
 
-class PopularRow extends StatelessWidget {
-  const PopularRow({
-    super.key,
-  });
+class PopularRow extends StatefulWidget {
+  final int restaurantID;
+  const PopularRow({super.key, required this.restaurantID});
+
+  @override
+  State<PopularRow> createState() => _PopularRowState();
+}
+
+class _PopularRowState extends State<PopularRow> {
+  List<Container> foods = [];
+
+  void getPopularFood() async {
+    List<PopularFood> temp = [];
+    List<Container> containers = [
+      Container(
+        margin: EdgeInsets.only(left: 10, bottom: 20, top: 10),
+        child: Text('Popular',
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            )),
+      )
+    ];
+    var db = Mysql();
+    temp = await db.getPopularFood(widget.restaurantID);
+    for (int i = 0; i < temp.length; i++) {
+      containers.add(Container(
+        height: 245 / 3,
+        child: Column(
+          children: [
+            Container(
+              height: 1,
+              decoration: BoxDecoration(color: Colors.white30),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              children: [
+                SizedBox(
+                  width: 5,
+                ),
+                Icon(
+                  Icons.ac_unit_rounded,
+                  color: Colors.white38,
+                  size: 20,
+                ),
+                SizedBox(
+                  width: 5,
+                ),
+                Text(
+                  '${temp[i].productName}',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ));
+    }
+    setState(() {
+      foods = containers;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getPopularFood();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,59 +254,11 @@ class PopularRow extends StatelessWidget {
           },
           borderRadius: BorderRadius.circular(20),
           child: Container(
-            padding: EdgeInsets.all(3),
+            padding: EdgeInsets.all(2),
             child: Column(
-              textDirection: TextDirection.rtl,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(left: 10, bottom: 20, top: 10),
-                  child: Text('Popular',
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      )),
-                ),
-                for (int i = 0; i < 3; i++)
-                  Container(
-                    height: 245 / 3,
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 1,
-                          decoration: BoxDecoration(color: Colors.white30),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Icon(
-                              Icons.ac_unit_rounded,
-                              color: Colors.white38,
-                              size: 20,
-                            ),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              'food $i',
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
+                textDirection: TextDirection.rtl,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: foods),
           ),
         ),
       ),

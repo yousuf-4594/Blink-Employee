@@ -31,7 +31,6 @@ class FoodDelivery extends StatelessWidget {
         // RestaurantScreen.id: (context) => RestaurantScreen(),
         // SettingsScreen.id: (context) => SettingsScreen(),
       },
-
       // home: MainNavigator(),
       // home: OnboardingScreen(),
     );

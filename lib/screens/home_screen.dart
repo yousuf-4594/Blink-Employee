@@ -6,6 +6,7 @@ import 'package:food_delivery_restraunt/classes/restaurant.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
+import 'package:food_delivery_restraunt/classes/UiColor.dart';
 
 import 'package:food_delivery_restraunt/mysql.dart';
 
@@ -57,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ui.val(0),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -143,11 +145,12 @@ class _HomeScreenState extends State<HomeScreen> {
             delegate: SliverChildListDelegate(
               [
                 SizedBox(height: 30),
-                const ListTile(
+                ListTile(
                   title: Text(
                     'Orders',
                     style: TextStyle(
                       fontSize: 50,
+                      color: ui.val(4),
                     ),
                   ),
                 ),
@@ -193,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 isScrollable: false,
                                 indicator: BoxDecoration(
                                   borderRadius: BorderRadius.circular(30),
-                                  color: Color.fromARGB(255, 145, 197, 248),
+                                  color: ui.val(10),
                                 ),
                               ),
                             ),
@@ -301,10 +304,12 @@ class _OrderListViewState extends State<OrderListView> {
                         },
                         autoClose: true,
                         borderRadius: BorderRadius.circular(20),
-                        backgroundColor: Colors.red,
+                        backgroundColor: Color.fromARGB(255, 255, 97, 86),
                         icon: Icons.delete,
+                        foregroundColor: ui.val(0),
                       )
                     : Container(),
+                SizedBox(width: 2),
                 orders[index].status == 'pending'
                     ? SlidableAction(
                         onPressed: (context) {
@@ -320,7 +325,8 @@ class _OrderListViewState extends State<OrderListView> {
                         },
                         autoClose: true,
                         borderRadius: BorderRadius.circular(20),
-                        backgroundColor: Colors.green,
+                        backgroundColor:
+                            const Color.fromARGB(255, 110, 255, 114),
                         icon: Icons.add,
                       )
                     : SlidableAction(
@@ -338,7 +344,8 @@ class _OrderListViewState extends State<OrderListView> {
                         },
                         autoClose: true,
                         borderRadius: BorderRadius.circular(20),
-                        backgroundColor: Colors.green,
+                        backgroundColor:
+                            const Color.fromARGB(255, 110, 255, 114),
                         icon: Icons.add,
                       ),
                 // GestureDetector(
@@ -364,13 +371,13 @@ class _OrderListViewState extends State<OrderListView> {
               margin: const EdgeInsets.symmetric(horizontal: 2.5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20.0),
-                color: Color.fromARGB(132, 0, 0, 0),
-                boxShadow: [
-                  BoxShadow(
-                      blurRadius: 0.5,
-                      spreadRadius: 0.5,
-                      color: Colors.grey[400]!),
-                ],
+                color: ui.val(1),
+                // boxShadow: [
+                //   BoxShadow(
+                //       blurRadius: 0.5,
+                //       spreadRadius: 0.5,
+                //       color: Colors.grey[400]!),
+                // ],
               ),
 
               // ListView row
@@ -390,19 +397,38 @@ class _OrderListViewState extends State<OrderListView> {
                               fontSize: 20,
                               color: Colors.white,
                             )),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                        if (orders[index].status == 'pending')
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: ui.val(10).withOpacity(0.85),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                            ),
+                            child: Text(
+                                '${item.status}', // supposed to be a button  [Finish | Prepare]
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: ui.val(1),
+                                  fontWeight: FontWeight.w500,
+                                )),
                           ),
-                          child: Text(
-                              '${item.status}', // supposed to be a button  [Finish | Prepare]
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.white,
-                              )),
-                        ),
+                        if (orders[index].status == 'processing')
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.blueAccent.withOpacity(1),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                            ),
+                            child: Text(
+                                '${item.status}', // supposed to be a button  [Finish | Prepare]
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: ui.val(1),
+                                  fontWeight: FontWeight.w500,
+                                )),
+                          ),
                       ],
                     ),
                   ),
@@ -410,7 +436,7 @@ class _OrderListViewState extends State<OrderListView> {
                       padding: EdgeInsets.only(
                           top: 10, bottom: 10, left: 20, right: 25),
                       decoration: BoxDecoration(
-                        color: Color.fromARGB(107, 255, 135, 61),
+                        color: ui.val(2),
                         borderRadius: BorderRadius.all(Radius.circular(10)),
                       ),
                       child: ListView.builder(

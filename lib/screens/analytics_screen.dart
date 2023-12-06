@@ -4,7 +4,8 @@ import 'package:food_delivery_restraunt/mysql.dart';
 import 'package:food_delivery_restraunt/screens/orderPlaceScreen.dart';
 import 'package:food_delivery_restraunt/screens/revenueScreen.dart';
 import 'package:food_delivery_restraunt/services/analytics.dart';
-
+import 'package:food_delivery_restraunt/classes/UiColor.dart';
+import 'package:flutter/services.dart';
 import '../classes/restaurant.dart';
 import '../graphs/barGraphDoubleLines.dart';
 import '../graphs/piChart.dart';
@@ -45,10 +46,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: ui.val(0),
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(60.0),
           child: AppBar(
+            systemOverlayStyle: SystemUiOverlayStyle(
+              systemNavigationBarColor: ui.val(0),
+              statusBarColor: Colors.black,
+            ),
             automaticallyImplyLeading: false,
             title: Text(
               'Dhaba',
@@ -118,7 +123,7 @@ class piChartRow extends StatelessWidget {
         margin: EdgeInsets.only(left: 5, right: 5, top: 10),
         height: 300,
         decoration: BoxDecoration(
-          color: Colors.white10,
+          color: ui.val(1),
           borderRadius: BorderRadius.circular(20),
         ),
         child: InkWell(
@@ -237,7 +242,7 @@ class _PopularRowState extends State<PopularRow> {
       child: Container(
         margin: EdgeInsets.only(left: 5, top: 10, right: 5),
         decoration: BoxDecoration(
-          color: Colors.white10,
+          color: ui.val(1),
           borderRadius: BorderRadius.circular(20),
         ),
         child: InkWell(
@@ -272,7 +277,7 @@ class RevenueRow extends StatelessWidget {
       margin: EdgeInsets.only(left: 5, right: 5, top: 10),
       height: 100,
       decoration: BoxDecoration(
-        color: Colors.white10,
+        color: ui.val(1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: InkWell(
@@ -346,7 +351,7 @@ class ReviewsRow extends StatelessWidget {
         margin: EdgeInsets.only(left: 5, right: 5, top: 10),
         height: 100,
         decoration: BoxDecoration(
-          color: Colors.white10,
+          color: ui.val(1),
           borderRadius: BorderRadius.circular(20),
         ),
         child: InkWell(
@@ -563,7 +568,7 @@ class OrdersPlacedRow extends StatelessWidget {
         margin: EdgeInsets.only(left: 5, right: 5, top: 10),
         height: 100,
         decoration: BoxDecoration(
-          color: Colors.white10,
+          color: ui.val(1),
           borderRadius: BorderRadius.circular(20),
         ),
         child: InkWell(
@@ -636,7 +641,7 @@ class TimeSlotSalesRow extends StatelessWidget {
       height: 300,
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
-        color: Colors.white10,
+        color: ui.val(1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: InkWell(
@@ -669,7 +674,7 @@ class ImpressionRow extends StatelessWidget {
       margin: EdgeInsets.only(left: 5, right: 5, top: 10),
       height: 100,
       decoration: BoxDecoration(
-        color: Colors.white10,
+        color: ui.val(1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Container(

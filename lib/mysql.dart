@@ -53,6 +53,7 @@ class Mysql {
         break;
       }
     }
+    await conn.close();
     return productID;
   }
 

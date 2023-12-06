@@ -542,7 +542,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Add items to " + widget.disp.categoryName + " category",
+                  "Add Items to " + widget.disp.categoryName + " category",
                   style: TextStyle(
                     fontSize: 25.0,
                     fontWeight: FontWeight.bold,
@@ -614,7 +614,10 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                           });
                         }
                       }
-                      Navigator.pop(context);
+                      await Future.delayed(const Duration(seconds: 2));
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
                     }
                   },
                   child: Container(

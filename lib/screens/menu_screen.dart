@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/mysql.dart';
 import 'package:mysql_client/mysql_client.dart';
+import 'package:food_delivery_restraunt/classes/UiColor.dart';
+import 'package:flutter/services.dart';
 
 import '../classes/restaurant.dart';
 
@@ -91,9 +93,14 @@ class _CartScreenState extends State<MenuScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ui.val(0),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(60.0),
         child: AppBar(
+          systemOverlayStyle: SystemUiOverlayStyle(
+            systemNavigationBarColor: ui.val(0),
+            statusBarColor: Colors.black,
+          ),
           automaticallyImplyLeading: false,
           title: Text(
             'Dhaba',
@@ -127,7 +134,10 @@ class _CartScreenState extends State<MenuScreen> {
           Row(
             children: [
               IconButton(
-                icon: Icon(Icons.api_rounded),
+                icon: Icon(
+                  Icons.api_rounded,
+                  color: ui.val(4),
+                ),
                 onPressed: () {},
               ),
               Text(
@@ -135,6 +145,7 @@ class _CartScreenState extends State<MenuScreen> {
                 style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.bold,
+                  color: ui.val(4),
                 ),
               ),
             ],
@@ -183,7 +194,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
       width: double.infinity,
       margin: EdgeInsets.only(top: 20, left: 5, right: 5),
       decoration: BoxDecoration(
-        color: Colors.black87,
+        color: ui.val(1),
         borderRadius: BorderRadius.all(Radius.circular(20)),
       ),
       child: Column(
@@ -224,7 +235,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                     child: Text(
                       'delete',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: const Color.fromARGB(255, 255, 102, 91),
                         fontSize: 20,
                       ),
                     ),
@@ -253,7 +264,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
-                      backgroundColor: const Color.fromARGB(255, 252, 252, 252),
+                      backgroundColor: ui.val(1),
                       shape: RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.vertical(top: Radius.circular(20)),
@@ -272,20 +283,37 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                                   style: TextStyle(
                                     fontSize: 25.0,
                                     fontWeight: FontWeight.bold,
+                                    color: ui.val(4),
                                   ),
                                 ),
                                 SizedBox(height: 32.0),
-                                Text("Food Name:"),
+                                Text(
+                                  "Food Name:",
+                                  style: TextStyle(
+                                    color: ui.val(4),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                                 SizedBox(height: 8.0),
                                 TextField(
                                   controller: namecontroller,
                                   decoration: InputDecoration(
                                     hintText: 'Enter Food Name',
                                     border: OutlineInputBorder(),
+                                    hintStyle: TextStyle(
+                                      color: ui.val(4),
+                                    ),
                                   ),
+                                  style: TextStyle(color: ui.val(4)),
                                 ),
                                 SizedBox(height: 16.0),
-                                Text("Food Price:"),
+                                Text(
+                                  "Food Price:",
+                                  style: TextStyle(
+                                    color: ui.val(4),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                                 SizedBox(height: 8.0),
                                 TextField(
                                   onTap: () {
@@ -295,7 +323,11 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                                   decoration: InputDecoration(
                                     hintText: 'Enter Food Price',
                                     border: OutlineInputBorder(),
+                                    hintStyle: TextStyle(
+                                      color: ui.val(4),
+                                    ),
                                   ),
+                                  style: TextStyle(color: ui.val(4)),
                                 ),
                                 SizedBox(height: 25.0),
                                 InkWell(
@@ -304,7 +336,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                                     padding:
                                         EdgeInsets.only(top: 15, bottom: 15),
                                     decoration: BoxDecoration(
-                                        color: Colors.amber,
+                                        color: ui.val(9),
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(5))),
                                     alignment: Alignment.center,
@@ -327,7 +359,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                   child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30.0),
-                        color: Colors.brown,
+                        color: ui.val(9).withOpacity(0.6),
                       ),
                       margin: EdgeInsets.only(top: 15.0, right: 5, left: 5),
                       child: Row(
@@ -339,7 +371,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                             decoration: BoxDecoration(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(30)),
-                              color: Colors.white,
+                              color: ui.val(1),
                             ),
                           ),
                           SizedBox(
@@ -398,7 +430,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30.0),
-                            color: Colors.brown,
+                            color: ui.val(9).withOpacity(0.3),
                           ),
                           child: Row(
                             children: [
@@ -457,7 +489,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
               height: 35,
               margin: EdgeInsets.only(top: 15, left: 5, right: 5, bottom: 5),
               decoration: BoxDecoration(
-                color: Color.fromARGB(80, 255, 255, 255),
+                color: ui.val(10),
                 borderRadius: BorderRadius.circular(30.0),
               ),
               child: Row(
@@ -466,7 +498,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                   Text(
                     '+',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: ui.val(1),
                       fontWeight: FontWeight.w100,
                       fontSize: 30,
                     ),
@@ -474,7 +506,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                   Text(
                     '  Add',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: ui.val(1),
                       fontWeight: FontWeight.w400,
                       fontSize: 16,
                     ),
@@ -496,7 +528,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color.fromARGB(255, 252, 252, 252),
+      backgroundColor: ui.val(1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -510,32 +542,53 @@ class _CategoryWidgetState extends State<CategoryWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.disp.categoryName,
+                  "Add items to " + widget.disp.categoryName + " category",
                   style: TextStyle(
                     fontSize: 25.0,
                     fontWeight: FontWeight.bold,
+                    color: ui.val(4),
                   ),
                 ),
                 SizedBox(height: 32.0),
-                Text("Food Name:"),
+                Text(
+                  "Food Name:",
+                  style: TextStyle(
+                    color: ui.val(4),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 SizedBox(height: 8.0),
                 TextField(
                   decoration: InputDecoration(
                     hintText: 'Enter Food Name',
                     border: OutlineInputBorder(),
+                    hintStyle: TextStyle(
+                      color: ui.val(4),
+                    ),
                   ),
+                  style: TextStyle(color: ui.val(4)),
                   onChanged: (text) {
                     foodName = text;
                   },
                 ),
                 SizedBox(height: 16.0),
-                Text("Food Price:"),
+                Text(
+                  "Food Price:",
+                  style: TextStyle(
+                    color: ui.val(4),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 SizedBox(height: 8.0),
                 TextField(
                   decoration: InputDecoration(
                     hintText: 'Enter Food Price',
                     border: OutlineInputBorder(),
+                    hintStyle: TextStyle(
+                      color: ui.val(4),
+                    ),
                   ),
+                  style: TextStyle(color: ui.val(4)),
                   onChanged: (text) {
                     try {
                       int p = int.parse(text);
@@ -567,7 +620,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                   child: Container(
                     padding: EdgeInsets.only(top: 15, bottom: 15),
                     decoration: BoxDecoration(
-                        color: Colors.amber,
+                        color: ui.val(10),
                         borderRadius: BorderRadius.all(Radius.circular(5))),
                     alignment: Alignment.center,
                     child: Text('Add to menu'),

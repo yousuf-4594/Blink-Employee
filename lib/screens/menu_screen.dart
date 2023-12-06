@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/mysql.dart';
 import 'package:mysql_client/mysql_client.dart';
 import 'package:food_delivery_restraunt/classes/UiColor.dart';
+import 'package:flutter/services.dart';
 
 import '../classes/restaurant.dart';
 
@@ -96,6 +97,10 @@ class _CartScreenState extends State<MenuScreen> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(60.0),
         child: AppBar(
+          systemOverlayStyle: SystemUiOverlayStyle(
+            systemNavigationBarColor: ui.val(0),
+            statusBarColor: Colors.black,
+          ),
           automaticallyImplyLeading: false,
           title: Text(
             'Dhaba',

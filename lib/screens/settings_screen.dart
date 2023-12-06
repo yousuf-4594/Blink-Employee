@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/components/setting_switch.dart';
 import 'package:food_delivery_restraunt/components/title_button.dart';
-
+import 'package:flutter/services.dart';
 import '../graphs/barGraphDoubleLines.dart';
+import 'package:food_delivery_restraunt/classes/UIColor.dart';
 import '../graphs/piChart.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -13,385 +14,179 @@ class SettingsScreen extends StatefulWidget {
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
+/*
+User settings options
+Profile settings (Name/password)
+  |----> password changing ke liye email verification?
+App theme Dark/Light/SystemSettings
+Notification preferences Turn ON OFF
+stored billing information Add/Remove/Delete
+view past orders
+  |----> view us order ki detail
+Terms of service and privacy policy
+App version information
+FAQs
+Feedback Form
+*/
+
 class _SettingsScreenState extends State<SettingsScreen> {
   bool light = true;
+  late String name = '';
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Settings',
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              print('pressed');
-            },
-            icon: Icon(Icons.add),
-          ),
-        ],
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Color.fromARGB(255, 44, 44, 44),
+    ));
+    return Container(
+      decoration: BoxDecoration(
+        color: ui.val(0),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: 20.0,
-            horizontal: 15.0,
+      child: ListView(
+        children: [
+          Header(
+            name: "Dhaaba",
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                'Large Title',
-                style: TextStyle(
-                  fontSize: 40.0,
-                ),
-              ),
-              SizedBox(
-                height: 30.0,
-              ),
-              SettingSwitch(
-                primaryTitle: 'Setting Title',
-                secondaryTitle: 'Secondary line of text',
-                switchValue: false,
-              ),
-              Divider(
-                color: Colors.grey,
-                thickness: 1,
-              ),
-              SettingSwitch(
-                primaryTitle: 'Setting Title',
-                secondaryTitle: 'Secondary line of text',
-                switchValue: true,
-              ),
-              Divider(
-                color: Colors.grey,
-                thickness: 1,
-              ),
-              SettingSwitch(
-                primaryTitle: 'Setting Title',
-                secondaryTitle: 'Secondary line of text',
-                switchValue: false,
-              ),
-              Divider(
-                color: Colors.grey,
-                thickness: 1,
-              ),
-              Column(
-                children: [
-                  TitleButton(
-                    title: "Title",
-                    onPressed: () {
-                      print('pressed');
-                    },
-                  ),
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  TitleButton(
-                    title: "Title",
-                    onPressed: () {
-                      print('pressed');
-                    },
-                  ),
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  TitleButton(
-                    title: "Title",
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              )
-            ],
+          const SizedBox(height: 30.0),
+          Divider(color: Colors.transparent, thickness: 2),
+          SettingSwitch(
+            primaryTitle: 'Dark Mode',
+            secondaryTitle: 'Turn on dark mode',
+            switchValue: true,
           ),
-        ),
+          Divider(color: Colors.transparent, thickness: 2),
+          SettingSwitch(
+            primaryTitle: 'Push notifications',
+            secondaryTitle: 'Turn on to get notified on each ',
+            switchValue: false,
+          ),
+          Divider(color: Colors.transparent, thickness: 2),
+          TitleButton(
+            title: "FAQs",
+            subtitle: "Answer to your frequently asked questions",
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          Divider(color: Colors.transparent, thickness: 2),
+          TitleButton(
+            title: "Contact Us",
+            subtitle: "Chat with our customer support panel",
+            onPressed: () {},
+          ),
+          Divider(color: Colors.transparent, thickness: 2),
+          TitleButton(
+            title: "Privacy support",
+            subtitle: "Agree to terms and conditions",
+            onPressed: () {},
+          ),
+          Divider(color: Colors.transparent, thickness: 2),
+          TitleButton(
+            title: "Billing",
+            subtitle: "Add/delete billing information",
+            onPressed: () {},
+          ),
+          Divider(color: Colors.transparent, thickness: 2),
+          SizedBox(
+            height: 50,
+          ),
+          Container(
+            width: 4,
+            height: 40,
+            padding: EdgeInsets.only(left: 18, right: 18),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: ui.val(10),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Container(
+                  child: Text(
+                'Logout',
+                style: TextStyle(color: ui.val(0), fontWeight: FontWeight.bold),
+              )),
+            ),
+          )
+        ],
       ),
     );
   }
 }
 
+class Header extends StatelessWidget {
+  final String name;
+  const Header({super.key, required this.name});
 
-
-
-
-// import 'package:fl_chart/fl_chart.dart';
-// import 'package:flutter/material.dart';
-
-// class SettingsScreen extends StatefulWidget {
-//   SettingsScreen({super.key});
-//   final Color leftBarColor = Colors.orange;
-//   final Color rightBarColor = Colors.pinkAccent;
-//   final Color avgColor = Colors.greenAccent;
-
-//   @override
-//   State<StatefulWidget> createState() => BarChartSample2State();
-// }
-
-// class BarChartSample2State extends State<SettingsScreen> {
-//   final double width = 7;
-
-//   late List<BarChartGroupData> rawBarGroups;
-//   late List<BarChartGroupData> showingBarGroups;
-
-//   int touchedGroupIndex = -1;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     final barGroup1 = makeGroupData(0, 5, 12);
-//     final barGroup2 = makeGroupData(1, 16, 12);
-//     final barGroup3 = makeGroupData(2, 18, 5);
-//     final barGroup4 = makeGroupData(3, 20, 16);
-//     final barGroup5 = makeGroupData(4, 17, 6);
-//     final barGroup6 = makeGroupData(5, 19, 1.5);
-//     final barGroup7 = makeGroupData(6, 10, 1.5);
-
-//     final items = [
-//       barGroup1,
-//       barGroup2,
-//       barGroup3,
-//       barGroup4,
-//       barGroup5,
-//       barGroup6,
-//       barGroup7,
-//     ];
-
-//     rawBarGroups = items;
-
-//     showingBarGroups = rawBarGroups;
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return AspectRatio(
-//       aspectRatio: 1,
-//       child: Padding(
-//         padding: const EdgeInsets.all(16),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.stretch,
-//           children: <Widget>[
-//             Row(
-//               mainAxisSize: MainAxisSize.min,
-//               children: <Widget>[
-//                 makeTransactionsIcon(),
-//                 const SizedBox(
-//                   width: 38,
-//                 ),
-//                 const Text(
-//                   'Transactions',
-//                   style: TextStyle(color: Colors.white, fontSize: 22),
-//                 ),
-//                 const SizedBox(
-//                   width: 4,
-//                 ),
-//                 const Text(
-//                   'state',
-//                   style: TextStyle(color: Color(0xff77839a), fontSize: 16),
-//                 ),
-//               ],
-//             ),
-//             const SizedBox(
-//               height: 38,
-//             ),
-//             Expanded(
-//               child: BarChart(
-//                 BarChartData(
-//                   maxY: 20,
-//                   barTouchData: BarTouchData(
-//                     touchTooltipData: BarTouchTooltipData(
-//                       tooltipBgColor: Colors.grey,
-//                       getTooltipItem: (a, b, c, d) => null,
-//                     ),
-//                     touchCallback: (FlTouchEvent event, response) {
-//                       if (response == null || response.spot == null) {
-//                         setState(() {
-//                           touchedGroupIndex = -1;
-//                           showingBarGroups = List.of(rawBarGroups);
-//                         });
-//                         return;
-//                       }
-
-//                       touchedGroupIndex = response.spot!.touchedBarGroupIndex;
-
-//                       setState(() {
-//                         if (!event.isInterestedForInteractions) {
-//                           touchedGroupIndex = -1;
-//                           showingBarGroups = List.of(rawBarGroups);
-//                           return;
-//                         }
-//                         showingBarGroups = List.of(rawBarGroups);
-//                         if (touchedGroupIndex != -1) {
-//                           var sum = 0.0;
-//                           for (final rod
-//                               in showingBarGroups[touchedGroupIndex].barRods) {
-//                             sum += rod.toY;
-//                           }
-//                           final avg = sum /
-//                               showingBarGroups[touchedGroupIndex]
-//                                   .barRods
-//                                   .length;
-
-//                           showingBarGroups[touchedGroupIndex] =
-//                               showingBarGroups[touchedGroupIndex].copyWith(
-//                             barRods: showingBarGroups[touchedGroupIndex]
-//                                 .barRods
-//                                 .map((rod) {
-//                               return rod.copyWith(
-//                                   toY: avg, color: widget.avgColor);
-//                             }).toList(),
-//                           );
-//                         }
-//                       });
-//                     },
-//                   ),
-//                   titlesData: FlTitlesData(
-//                     show: true,
-//                     rightTitles: const AxisTitles(
-//                       sideTitles: SideTitles(showTitles: false),
-//                     ),
-//                     topTitles: const AxisTitles(
-//                       sideTitles: SideTitles(showTitles: false),
-//                     ),
-//                     bottomTitles: AxisTitles(
-//                       sideTitles: SideTitles(
-//                         showTitles: true,
-//                         getTitlesWidget: bottomTitles,
-//                         reservedSize: 42,
-//                       ),
-//                     ),
-//                     leftTitles: AxisTitles(
-//                       sideTitles: SideTitles(
-//                         showTitles: true,
-//                         reservedSize: 28,
-//                         interval: 1,
-//                         getTitlesWidget: leftTitles,
-//                       ),
-//                     ),
-//                   ),
-//                   borderData: FlBorderData(
-//                     show: false,
-//                   ),
-//                   barGroups: showingBarGroups,
-//                   // gridData: const FlGridData(show: false),
-//                 ),
-//               ),
-//             ),
-//             const SizedBox(
-//               height: 12,
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget leftTitles(double value, TitleMeta meta) {
-//     const style = TextStyle(
-//       color: Color(0xff7589a2),
-//       fontWeight: FontWeight.bold,
-//       fontSize: 14,
-//     );
-//     String text;
-//     if (value == 0) {
-//       text = '1K';
-//     } else if (value == 10) {
-//       text = '5K';
-//     } else if (value == 19) {
-//       text = '10K';
-//     } else {
-//       return Container();
-//     }
-//     return SideTitleWidget(
-//       axisSide: meta.axisSide,
-//       space: 0,
-//       child: Text(text, style: style),
-//     );
-//   }
-
-//   Widget bottomTitles(double value, TitleMeta meta) {
-//     final titles = <String>['Mn', 'Te', 'Wd', 'Tu', 'Fr', 'St', 'Su'];
-
-//     final Widget text = Text(
-//       titles[value.toInt()],
-//       style: const TextStyle(
-//         color: Color(0xff7589a2),
-//         fontWeight: FontWeight.bold,
-//         fontSize: 14,
-//       ),
-//     );
-
-//     return SideTitleWidget(
-//       axisSide: meta.axisSide,
-//       space: 16, //margin top
-//       child: text,
-//     );
-//   }
-
-//   BarChartGroupData makeGroupData(int x, double y1, double y2) {
-//     return BarChartGroupData(
-//       barsSpace: 4,
-//       x: x,
-//       barRods: [
-//         BarChartRodData(
-//           toY: y1,
-//           color: widget.leftBarColor,
-//           width: width,
-//         ),
-//         BarChartRodData(
-//           toY: y2,
-//           color: widget.rightBarColor,
-//           width: width,
-//         ),
-//       ],
-//     );
-//   }
-
-//   Widget makeTransactionsIcon() {
-//     const width = 4.5;
-//     const space = 3.5;
-//     return Row(
-//       mainAxisSize: MainAxisSize.min,
-//       children: <Widget>[
-//         Container(
-//           width: width,
-//           height: 10,
-//           color: Colors.white.withOpacity(0.4),
-//         ),
-//         const SizedBox(
-//           width: space,
-//         ),
-//         Container(
-//           width: width,
-//           height: 28,
-//           color: Colors.white.withOpacity(0.8),
-//         ),
-//         const SizedBox(
-//           width: space,
-//         ),
-//         Container(
-//           width: width,
-//           height: 42,
-//           color: Colors.white.withOpacity(1),
-//         ),
-//         const SizedBox(
-//           width: space,
-//         ),
-//         Container(
-//           width: width,
-//           height: 28,
-//           color: Colors.white.withOpacity(0.8),
-//         ),
-//         const SizedBox(
-//           width: space,
-//         ),
-//         Container(
-//           width: width,
-//           height: 10,
-//           color: Colors.white.withOpacity(0.4),
-//         ),
-//       ],
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: 210,
+          decoration: BoxDecoration(
+            color: Color.fromARGB(255, 44, 44, 44),
+          ),
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: 200,
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 38, 38, 38),
+            borderRadius:
+                BorderRadius.vertical(top: Radius.elliptical(190, 100)),
+          ),
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: 150,
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 29, 29, 29),
+            borderRadius:
+                BorderRadius.vertical(top: Radius.elliptical(210, 100)),
+          ),
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: 100,
+          decoration: BoxDecoration(
+            color: ui.val(0),
+            borderRadius:
+                BorderRadius.vertical(top: Radius.elliptical(230, 100)),
+          ),
+        ),
+        Positioned(
+          top: 70,
+          left: (MediaQuery.of(context).size.width / 2) - 50,
+          child: Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              border: Border.all(color: Colors.black38, width: 2),
+            ),
+            child: ClipOval(
+              child: Opacity(
+                opacity: 0.75,
+                child: Image.asset(
+                  'assets/icons/profileIcon.jpg',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Text(
+          name,
+          style: TextStyle(
+            fontSize: 40.0,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+}

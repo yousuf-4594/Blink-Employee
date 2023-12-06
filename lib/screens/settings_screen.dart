@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/components/setting_switch.dart';
 import 'package:food_delivery_restraunt/components/title_button.dart';
 import 'package:flutter/services.dart';
+import '../classes/restaurant.dart';
 import '../graphs/barGraphDoubleLines.dart';
 import 'package:food_delivery_restraunt/classes/UIColor.dart';
 import '../graphs/piChart.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const String id = 'settings_screen';
-  const SettingsScreen({super.key});
+  final Restaurant restaurant;
+  const SettingsScreen({super.key, required this.restaurant});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -45,7 +47,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: ListView(
         children: [
           Header(
-            name: "Dhaaba",
+            name: widget.restaurant.name,
           ),
           const SizedBox(height: 30.0),
           Divider(color: Colors.transparent, thickness: 2),

@@ -73,7 +73,7 @@ class _MainNavigatorState extends State<MainNavigator> {
         MenuScreen(
           restaurant: homeScreenArguments.restaurant,
         ),
-        SettingsScreen(),
+        SettingsScreen(restaurant: homeScreenArguments.restaurant),
       ][currentPageIndex],
     );
   }

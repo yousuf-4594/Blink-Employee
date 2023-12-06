@@ -56,7 +56,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             ),
             automaticallyImplyLeading: false,
             title: Text(
-              'Dhaba',
+              widget.restaurant.name,
               style: TextStyle(
                 fontSize: 50,
                 fontFamily: 'Britanic',

@@ -20,7 +20,7 @@ class Analytics {
     int count = 0;
     Mysql db = Mysql();
     Iterable<ResultSetRow> rows = await db.getResults(
-        'SELECT views FROM Impressions WHERE restaurant_id = $restaurantID;');
+        'SELECT views FROM Restaurant WHERE restaurant_id = $restaurantID;');
     if (rows.isNotEmpty) {
       for (var row in rows) {
         count = int.parse(row.assoc()['views']!);

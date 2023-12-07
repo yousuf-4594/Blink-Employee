@@ -11,6 +11,8 @@ import 'package:food_delivery_restraunt/user.dart';
 import 'package:mysql_client/mysql_client.dart';
 import 'package:food_delivery_restraunt/classes/restaurant.dart';
 import 'package:food_delivery_restraunt/arguments/home_screen_arguments.dart';
+import 'package:food_delivery_restraunt/classes/UiColor.dart';
+import 'package:flutter/services.dart';
 
 class LoginScreen extends StatefulWidget {
   static const id = 'login_screen';
@@ -70,9 +72,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      systemNavigationBarColor: ui.val(0),
+      statusBarColor: ui.val(0),
+    ));
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: Color(0xfff1eff6),
+      backgroundColor: ui.val(0),
       body: SafeArea(
         child: Form(
           child: Container(
@@ -92,6 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         textStyle: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 40,
+                          color: ui.val(4),
                         ),
                       ),
                     ),
@@ -106,6 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: GoogleFonts.lato(
                     textStyle: TextStyle(
                       fontSize: 20,
+                      color: ui.val(4),
                     ),
                   ),
                 ),
@@ -149,6 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       textStyle: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
+                        color: ui.val(4).withOpacity(0.3),
                       ),
                     ),
                   ),
@@ -182,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                     }
                   },
-                  color: Colors.lightBlue,
+                  color: ui.val(10),
                   verticalPadding: 15,
                   buttonChild: Text(
                     'Sign In',
@@ -191,7 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       textStyle: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
-                        color: Colors.white,
+                        color: ui.val(1),
                       ),
                     ),
                   ),
@@ -223,11 +232,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 LargeButton(
                   onPressed: () {},
-                  color: Colors.white,
+                  color: ui.val(1).withOpacity(0.3),
                   verticalPadding: 10,
                   buttonChild: Image.asset(
                     'images/google.png',
                     height: 40,
+                    color: ui.val(4).withOpacity(0.5),
                   ),
                 )
               ],

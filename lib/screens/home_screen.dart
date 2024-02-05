@@ -22,39 +22,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final itemList = [
-    {
-      'image': 'assets/icons/cancel.png',
-      'title': 'Chicken mayo boti roll',
-      'desc': 'priaaa',
-    },
-    {
-      'image': 'assets/icons/cancel.png',
-      'title': 'biryani',
-      'desc': 'price',
-    },
-    {
-      'image': 'assets/icons/cancel.png',
-      'title': 'Item 3',
-      'desc': 'price',
-    },
-    {
-      'image': 'assets/icons/cancel.png',
-      'title': 'Item 1',
-      'desc': 'price',
-    },
-    {
-      'image': 'assets/icons/cancel.png',
-      'title': 'Item 2',
-      'desc': 'price',
-    },
-    {
-      'image': 'assets/icons/cancel.png',
-      'title': 'Item 3',
-      'desc': 'price',
-    }
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,10 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: Color.fromARGB(255, 0, 0, 0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
-                bottomLeft:
-                    Radius.circular(20.0), // Adjust the radius as needed
-                bottomRight:
-                    Radius.circular(20.0), // Adjust the radius as needed
+                bottomLeft: Radius.circular(20.0),
+                bottomRight: Radius.circular(20.0),
               ),
             ),
             flexibleSpace: ClipRRect(
@@ -82,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 bottomRight: Radius.circular(20.0),
               ),
               child: FlexibleSpaceBar(
+                // Homepage restaurant Title
                 title: Text(
                   widget.restaurant.name,
                   style: TextStyle(
@@ -92,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 titlePadding: EdgeInsets.only(left: 16.0, bottom: 16.0),
                 background: Stack(
                   children: [
+                    // Homepage restaurant background image
                     Image.asset(
                       'images/kfc.jpg',
                       fit: BoxFit.cover,
@@ -141,6 +108,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+
+          /*
+            Sliver list represents entire body below the sliver header
+          */
           SliverList(
             delegate: SliverChildListDelegate(
               [
@@ -154,6 +125,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
+
+                /*
+                  Tab controller Allows to switch between
+                  - All orders
+                  - completed orders
+                  - pending orders
+                */
                 DefaultTabController(
                   length: 1,
                   child: Column(
@@ -177,18 +155,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                       style: TextStyle(),
                                     ),
                                   ),
-                                  // Tab(
-                                  //   child: Text(
-                                  //     'Preparing',
-                                  //     style: TextStyle(),
-                                  //   ),
-                                  // ),
-                                  // Tab(
-                                  //   child: Text(
-                                  //     'Completed',
-                                  //     style: TextStyle(),
-                                  //   ),
-                                  // ),
                                 ],
                                 labelColor: Color.fromARGB(255, 0, 0, 0),
                                 unselectedLabelColor:
@@ -206,19 +172,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       Container(
                         height: double.maxFinite,
                         child: NotificationListener<ScrollNotification>(
-                            onNotification: (notification) {
-                              return true;
-                            },
-                            child: TabBarView(
-                              children: [
-                                OrderListView(
-                                    restaurantID:
-                                        widget.restaurant.restaurantID,
-                                    status: 'all'),
-                                // OrderListView(itemList: itemList),
-                                // OrderListView(itemList: itemList),
-                              ],
-                            )),
+                          onNotification: (notification) {
+                            return true;
+                          },
+                          child: TabBarView(
+                            children: [
+                              OrderListView(
+                                restaurantID: widget.restaurant.restaurantID,
+                                status: 'all',
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -258,7 +223,6 @@ class _OrderListViewState extends State<OrderListView> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (mounted) {
       getOrders();
@@ -277,6 +241,9 @@ class _OrderListViewState extends State<OrderListView> {
     super.dispose();
   }
 
+  /*
+    Displays list of restaurants orders 
+  */
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -293,6 +260,7 @@ class _OrderListViewState extends State<OrderListView> {
             endActionPane: ActionPane(
               motion: const ScrollMotion(),
               children: [
+                // Slidable Delete button
                 orders[index].status == 'pending'
                     ? SlidableAction(
                         onPressed: (context) {
@@ -310,6 +278,8 @@ class _OrderListViewState extends State<OrderListView> {
                       )
                     : Container(),
                 SizedBox(width: 2),
+
+                // Slidable completed button
                 orders[index].status == 'pending'
                     ? SlidableAction(
                         onPressed: (context) {
@@ -348,20 +318,6 @@ class _OrderListViewState extends State<OrderListView> {
                             const Color.fromARGB(255, 110, 255, 114),
                         icon: Icons.add,
                       ),
-                // GestureDetector(
-                //   onTap: () {
-                //     setState(() {
-                //       itemList.removeAt(index);
-                //     });
-                //   },
-                //   child: Container(
-                //     width: 50,
-                //     decoration: const BoxDecoration(
-                //       color: Colors.amber,
-                //     ),
-                //     child: Icon(Icons.delete),
-                //   ),
-                // ),
                 const SizedBox(
                   width: 15,
                 ),
@@ -372,12 +328,6 @@ class _OrderListViewState extends State<OrderListView> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20.0),
                 color: ui.val(1),
-                // boxShadow: [
-                //   BoxShadow(
-                //       blurRadius: 0.5,
-                //       spreadRadius: 0.5,
-                //       color: Colors.grey[400]!),
-                // ],
               ),
 
               // ListView row
@@ -450,9 +400,11 @@ class _OrderListViewState extends State<OrderListView> {
                                 Row(
                                   children: [
                                     Container(
-                                      child: Text('1 x'), // quantity
+                                      child: Text(
+                                          '${item.orderDetails[index].quantity} x'), // quantity
                                       padding: EdgeInsets.all(5),
-                                      margin: EdgeInsets.only(right: 10),
+                                      margin:
+                                          EdgeInsets.only(right: 10, top: 5),
                                       decoration: BoxDecoration(
                                         color: Colors.grey,
                                         borderRadius: BorderRadius.all(

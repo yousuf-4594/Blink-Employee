@@ -6,6 +6,14 @@ import 'package:flutter/services.dart';
 
 import '../classes/restaurant.dart';
 
+
+
+/*
+    Represents Edit menu bottom navigation screen
+    here we can add / delete / update menu items from database
+
+*/
+
 class MenuScreen extends StatefulWidget {
   final Restaurant restaurant;
   const MenuScreen({super.key, required this.restaurant});
@@ -90,10 +98,15 @@ class _CartScreenState extends State<MenuScreen> {
     getCategory();
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: ui.val(0),
+
+      // app bar on top
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(60.0),
         child: AppBar(
@@ -125,6 +138,8 @@ class _CartScreenState extends State<MenuScreen> {
           ),
         ),
       ),
+
+      // list view body
       body: ListView(
         physics: BouncingScrollPhysics(),
         children: [
@@ -153,6 +168,7 @@ class _CartScreenState extends State<MenuScreen> {
           SizedBox(
             height: 20,
           ),
+          // the rest of screen displays a list of categorywidget
           Column(
             children: itemList.map((category) {
               return CategoryWidget(
@@ -181,8 +197,12 @@ class CategoryWidget extends StatefulWidget {
 }
 
 class _CategoryWidgetState extends State<CategoryWidget> {
+
+  // edit mode is when checkboxes are displayed
   bool isEditMode = true;
   List<bool> foodSelected = [];
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -257,6 +277,8 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                   TextEditingController(text: '${item.price}');
 
               if (isEditMode) {
+
+                
                 return GestureDetector(
                   onTap: () {
                     print(index);
@@ -478,6 +500,8 @@ class _CategoryWidgetState extends State<CategoryWidget> {
               }
             },
           ),
+
+          // Orange add button bottom of every category widget
           GestureDetector(
             onTap: () {
               print('${widget.disp.categoryID}');
@@ -520,6 +544,11 @@ class _CategoryWidgetState extends State<CategoryWidget> {
     );
   }
 
+  /*  
+      Add menu items to a specific food category 
+      pops up bottom modal sheet 
+      user may edit menu food items
+  */
   Future<dynamic> AddMenuItemBottomSheet(
       BuildContext context, int categoryID, int restaurantID) {
     String foodName = '';

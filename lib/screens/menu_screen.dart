@@ -1,3 +1,4 @@
+// import 'dart:js_util';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -36,7 +37,7 @@ class Category {
 
 class MenuItem {
   final String image;
-  final int productID;
+  final String productID;
   final String title;
   final int price;
 
@@ -114,9 +115,9 @@ class _CartScreenState extends State<MenuScreen> {
 
     try {
       // Reference to the "restaurant" document for the specific restaurant
-      DocumentReference restaurantDocumentRef =
-          FirebaseFirestore.instance.collection('restaurants')
-              .doc("eWjuiXzb15xfWxNnEZai"); // Replace with the actual restaurant ID
+      DocumentReference restaurantDocumentRef = FirebaseFirestore.instance
+          .collection('restaurants')
+          .doc("eWjuiXzb15xfWxNnEZai"); // Replace with the actual restaurant ID
 
       // Reference to the "foodItems" subcollection inside the restaurant document
       CollectionReference foodItemsCollection =
@@ -135,12 +136,11 @@ class _CartScreenState extends State<MenuScreen> {
         int index = categoryExists(temp, categoryName);
         if (index >= 0) {
           temp[index].items.add(MenuItem(
-            image: 'images/kfc.jpg',
-            title: foodItemData['Prod Name'],
-            price: foodItemData['Price'],
-            // productID: int.parse(foodItemDocument.id),
-            productID: Random().nextInt(10000),
-          ));
+                image: 'images/kfc.jpg',
+                title: foodItemData['Prod Name'],
+                price: foodItemData['Price'],
+                productID: foodItemDocument.id,
+              ));
         } else {
           temp.add(Category(
             categoryID: 100,
@@ -150,8 +150,7 @@ class _CartScreenState extends State<MenuScreen> {
                 image: 'images/kfc.jpg',
                 title: foodItemData['Prod Name'],
                 price: foodItemData['Price'],
-                // productID: int.parse(foodItemDocument.id),
-                productID: Random().nextInt(10000),
+                productID: foodItemDocument.id,
               ),
             ],
           ));
@@ -241,6 +240,7 @@ class _CartScreenState extends State<MenuScreen> {
           SizedBox(
             height: 20,
           ),
+
           // the rest of screen displays a list of categorywidget
           Column(
             children: itemList.map((category) {
@@ -259,6 +259,70 @@ class _CartScreenState extends State<MenuScreen> {
   }
 }
 
+/*
+    Updates the Food name and price in Firebase using productID hash
+
+*/
+Future<void> updateFoodItem(String restaurantID, String productId,
+    String newProdName, int newPrice) async {
+  try {
+    // Reference to the specific restaurant document using the provided ID
+    DocumentReference restaurantDocumentRef =
+        FirebaseFirestore.instance.collection('restaurants').doc(restaurantID);
+
+    // Reference to the "foodItems" subcollection inside the restaurant document
+    CollectionReference foodItemsCollection =
+        restaurantDocumentRef.collection('foodItems');
+
+    // Reference to the specific food item document by product ID
+    DocumentReference foodItemDocumentRef = foodItemsCollection.doc(productId);
+
+    // Update the fields in the document
+    await foodItemDocumentRef.update({
+      'Prod Name': newProdName,
+      'Price': newPrice,
+    });
+
+    print('Food item updated successfully!');
+  } catch (error) {
+    print('Error updating food item: $error');
+    // Handle the error as needed
+  }
+}
+
+Future<void> addFoodItem(String restaurantID, String categoryName,
+    String prodName, int price, String likeCount) async {
+  try {
+    // Reference to the "restaurants" collection
+    CollectionReference restaurantsCollection =
+        FirebaseFirestore.instance.collection('restaurants');
+
+    // Reference to the specific restaurant document
+    DocumentReference restaurantDocumentRef =
+        restaurantsCollection.doc(restaurantID);
+
+    // Reference to the "foodItems" subcollection inside the restaurant document
+    CollectionReference foodItemsCollection =
+        restaurantDocumentRef.collection('foodItems');
+
+    // Add a new document with auto-generated ID to the "foodItems" subcollection
+    await foodItemsCollection.add({
+      'Category Name': categoryName,
+      'Prod Name': prodName,
+      'Price': price,
+      'Like Count': likeCount,
+    });
+
+    print('Food item added successfully!');
+  } catch (error) {
+    print('Error adding food item: $error');
+    // Handle the error as needed
+  }
+}
+
+/*
+    Displays the categorical divisions of food items on edit menu
+*/
 class CategoryWidget extends StatefulWidget {
   final Category disp;
   final int restaurantID;
@@ -325,7 +389,8 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                     child: Text(
                       'delete',
                       style: TextStyle(
-                        color: const Color.fromARGB(255, 255, 102, 91),
+                        color: const Color.fromARGB(255, 255, 102, 91)
+                            .withOpacity(0.8),
                         fontSize: 20,
                       ),
                     ),
@@ -349,8 +414,11 @@ class _CategoryWidgetState extends State<CategoryWidget> {
               if (isEditMode) {
                 return GestureDetector(
                   onTap: () {
-                    print(index);
-
+                    // print(index);
+                    /*
+                      prints Edit food item Bottom Model if 
+                      any food item on the menu is clicked
+                    */
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
@@ -421,7 +489,19 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                                 ),
                                 SizedBox(height: 25.0),
                                 InkWell(
-                                  onTap: () {},
+                                  /*
+                                      Makes updation operation to database
+                                  */
+                                  onTap: () {
+                                    // print(item.productID);
+                                    print("boom ${pricecontroller.text}");
+
+                                    updateFoodItem(
+                                        "eWjuiXzb15xfWxNnEZai",
+                                        item.productID,
+                                        namecontroller.text,
+                                        int.parse(pricecontroller.text));
+                                  },
                                   child: Container(
                                     padding:
                                         EdgeInsets.only(top: 15, bottom: 15),
@@ -520,7 +600,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30.0),
-                            color: ui.val(9).withOpacity(0.3),
+                            color: ui.val(9).withOpacity(0.5),
                           ),
                           child: Row(
                             children: [
@@ -532,7 +612,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                                 decoration: BoxDecoration(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(30)),
-                                  color: Colors.white,
+                                  color: ui.val(1),
                                 ),
                               ),
                               SizedBox(
@@ -696,26 +776,28 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                 SizedBox(height: 25.0),
                 InkWell(
                   onTap: () async {
-                    if (foodName.isNotEmpty && price > 0) {
-                      var db = Mysql();
-                      int productID = await db.addProduct(
-                          foodName, restaurantID, categoryID, price);
-                      for (int i = 0; i < itemList.length; i++) {
-                        if (itemList[i].categoryID == categoryID) {
-                          setState(() {
-                            itemList[i].items.add(MenuItem(
-                                image: 'images/kfc.jpg',
-                                title: foodName,
-                                price: price,
-                                productID: productID));
-                          });
-                        }
-                      }
-                      await Future.delayed(const Duration(seconds: 2));
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                      }
-                    }
+                    // if (foodName.isNotEmpty && price > 0) {
+                    //   var db = Mysql();
+                    //   int productID = await db.addProduct(
+                    //       foodName, restaurantID, categoryID, price);
+                    //   for (int i = 0; i < itemList.length; i++) {
+                    //     if (itemList[i].categoryID == categoryID) {
+                    //       setState(() {
+                    //         itemList[i].items.add(MenuItem(
+                    //             image: 'images/kfc.jpg',
+                    //             title: foodName,
+                    //             price: price,
+                    //             productID: productID));
+                    //       });
+                    //     }
+                    //   }
+                    //   await Future.delayed(const Duration(seconds: 2));
+                    //   if (context.mounted) {
+                    //     Navigator.pop(context);
+                    //   }
+                    // }
+                    addFoodItem("eWjuiXzb15xfWxNnEZai",
+                        widget.disp.categoryName, foodName, price, "0");
                   },
                   child: Container(
                     padding: EdgeInsets.only(top: 15, bottom: 15),

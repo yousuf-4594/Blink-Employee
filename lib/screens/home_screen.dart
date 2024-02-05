@@ -210,252 +210,262 @@ class OrderListView extends StatefulWidget {
 }
 
 class _OrderListViewState extends State<OrderListView> {
-  late List<Order> orders = [];
+  late Stream<List<Order>> ordersStream;
 
-  void getOrders() async {
-    List<Order> tempOrders = await Order.getPendingOrders(widget.restaurantID);
-    if (this.mounted) {
-      setState(() {
-        orders = tempOrders;
-      });
-    }
-  }
+  // void getOrders() async {
+  //   List<Order> tempOrders = await Order.getPendingOrders(widget.restaurantID);
+  //   if (this.mounted) {
+  //     setState(() {
+  //       orders = tempOrders;
+  //     });
+  //   }
+  // }
 
   @override
   void initState() {
     super.initState();
-    if (mounted) {
-      getOrders();
-      timer = Timer.periodic(
-          const Duration(seconds: 60), (Timer t) => setState(() {}));
-    } else {
-      timer.cancel();
-    }
+    ordersStream = Order.getRealTimeOrders(widget.restaurantID);
   }
 
-  late var timer;
+  // late var timer;
 
-  @override
-  void dispose() {
-    timer.cancel();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   timer.cancel();
+  //   super.dispose();
+  // }
 
   /*
     Displays list of restaurants orders 
   */
+  /*
+    Displays list of restaurant orders 
+  */
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: orders.length,
-      itemBuilder: (context, index) {
-        final item = orders[index];
-        return Padding(
-          padding: (index == 0)
-              ? const EdgeInsets.symmetric(vertical: 10.0)
-              : const EdgeInsets.only(bottom: 10.0),
-          child: Slidable(
-            key: Key('$item'),
-            endActionPane: ActionPane(
-              motion: const ScrollMotion(),
-              children: [
-                // Slidable Delete button
-                orders[index].status == 'pending'
-                    ? SlidableAction(
-                        onPressed: (context) {
-                          // var db = Mysql();
-                          // db.deleteOrder(orders[index].orderID);
-                          
-                          Order.updateStatus(orders[index].orderID, 'deleted');
-                          setState(() {
-                            orders.removeAt(index);
-                          });
+    return StreamBuilder<List<Order>>(
+      stream: ordersStream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator(); // or any loading indicator
+        }
 
-                        },
-                        autoClose: true,
-                        borderRadius: BorderRadius.circular(20),
-                        backgroundColor: Color.fromARGB(255, 255, 97, 86),
-                        icon: Icons.delete,
-                        foregroundColor: ui.val(0),
-                      )
-                    : Container(),
-                SizedBox(width: 2),
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No orders available.'));
+        }
 
-                // Slidable completed button
-                orders[index].status == 'pending'
-                    ? SlidableAction(
-                        onPressed: (context) {
-                          setState(() {
-                          //   // orders.removeAt(index);
-                          //   var db = Mysql();
-                          //   db.updateOrderStatus(
-                          //       orders[index].orderID, "processing");
+        List<Order> orders = snapshot.data!;
 
-                            Order.updateStatus(orders[index].orderID, 'processing');
-                            setState(() {
-                              orders[index].status = 'processing';
-                            });
-                          });
-                        },
-                        autoClose: true,
-                        borderRadius: BorderRadius.circular(20),
-                        backgroundColor:
-                            const Color.fromARGB(255, 110, 255, 114),
-                        icon: Icons.add,
-                      )
-                    : SlidableAction(
-                        onPressed: (context) {
-                          setState(() {
-                          //   // orders.removeAt(index);
-                          //   var db = Mysql();
-                          //   db.updateOrderStatus(
-                          //       orders[index].orderID, "completed");
+        return ListView.builder(
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: orders.length,
+          itemBuilder: (context, index) {
+            final item = orders[index];
+            return Padding(
+              padding: (index == 0)
+                  ? const EdgeInsets.symmetric(vertical: 10.0)
+                  : const EdgeInsets.only(bottom: 10.0),
+              child: Slidable(
+                key: Key('$item'),
+                endActionPane: ActionPane(
+                  motion: const ScrollMotion(),
+                  children: [
+                    // Slidable Delete button
+                    orders[index].status == 'pending'
+                        ? SlidableAction(
+                            onPressed: (context) {
+                              Order.updateStatus(
+                                  orders[index].orderID, 'deleted');
 
-                           Order.updateStatus(orders[index].orderID, 'completed');
-                            setState(() {
-                              orders[index].status = 'completed';
-                              orders.removeAt(index);
-                            });
-                          });
-                        },
-                        autoClose: true,
-                        borderRadius: BorderRadius.circular(20),
-                        backgroundColor:
-                            const Color.fromARGB(255, 110, 255, 114),
-                        icon: Icons.add,
-                      ),
-                const SizedBox(
-                  width: 15,
-                ),
-              ],
-            ),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 2.5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20.0),
-                color: ui.val(1),
-              ),
+                              // setState(() {
+                              //   orders.removeAt(index);
+                              // });
+                            },
+                            autoClose: true,
+                            borderRadius: BorderRadius.circular(20),
+                            backgroundColor: Color.fromARGB(255, 255, 97, 86),
+                            icon: Icons.delete,
+                            foregroundColor: ui.val(0),
+                          )
+                        : Container(),
+                    SizedBox(width: 2),
 
-              // ListView row
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: EdgeInsets.only(
-                        top: 10, bottom: 10, left: 20, right: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text('#${item.orderID}', // order number
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.white,
-                            )),
-                        if (orders[index].status == 'pending')
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            decoration: BoxDecoration(
-                              color: ui.val(10).withOpacity(0.85),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10)),
-                            ),
-                            child: Text(
-                                '${item.status}', // supposed to be a button  [Finish | Prepare]
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: ui.val(1),
-                                  fontWeight: FontWeight.w500,
-                                )),
+                    // Slidable completed button
+                    orders[index].status == 'pending'
+                        ? SlidableAction(
+                            onPressed: (context) {
+                              Order.updateStatus(
+                                  orders[index].orderID, 'processing');
+
+                              // setState(() {
+                              //   orders[index].status = 'processing';
+                              // });
+                            },
+                            autoClose: true,
+                            borderRadius: BorderRadius.circular(20),
+                            backgroundColor:
+                                const Color.fromARGB(255, 110, 255, 114),
+                            icon: Icons.add,
+                          )
+                        : SlidableAction(
+                            onPressed: (context) {
+                              Order.updateStatus(
+                                  orders[index].orderID, 'completed');
+                              // setState(() {
+                              //   orders[index].status = 'completed';
+                              //   orders.removeAt(index);
+                              // });
+                            },
+                            autoClose: true,
+                            borderRadius: BorderRadius.circular(20),
+                            backgroundColor:
+                                const Color.fromARGB(255, 110, 255, 114),
+                            icon: Icons.add,
                           ),
-                        if (orders[index].status == 'processing')
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.blueAccent.withOpacity(1),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10)),
-                            ),
-                            child: Text(
-                                '${item.status}', // supposed to be a button  [Finish | Prepare]
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: ui.val(1),
-                                  fontWeight: FontWeight.w500,
-                                )),
-                          ),
-                      ],
+                    const SizedBox(
+                      width: 15,
                     ),
+                  ],
+                ),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20.0),
+                    color: ui.val(1),
                   ),
-                  Container(
-                      padding: EdgeInsets.only(
-                          top: 10, bottom: 10, left: 20, right: 25),
-                      decoration: BoxDecoration(
-                        color: ui.val(2),
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                  // ListView row
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.only(
+                            top: 10, bottom: 10, left: 20, right: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              '#${item.orderID}', // order number
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.white,
+                              ),
+                            ),
+                            if (orders[index].status == 'pending')
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                decoration: BoxDecoration(
+                                  color: ui.val(10).withOpacity(0.85),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10)),
+                                ),
+                                child: Text(
+                                  '${item.status}', // supposed to be a button  [Finish | Prepare]
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: ui.val(1),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            if (orders[index].status == 'processing')
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.blueAccent.withOpacity(1),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10)),
+                                ),
+                                child: Text(
+                                  '${item.status}', // supposed to be a button  [Finish | Prepare]
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: ui.val(1),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                      child: ListView.builder(
-                          itemCount: item.orderDetails.length,
-                          shrinkWrap: true,
-                          itemBuilder: (context, index) {
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                          '${item.orderDetails[index].quantity} x'), // quantity
-                                      padding: EdgeInsets.all(5),
-                                      margin:
-                                          EdgeInsets.only(right: 10, top: 5),
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey,
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(20)),
+                      Container(
+                        padding: EdgeInsets.only(
+                            top: 10, bottom: 10, left: 20, right: 25),
+                        decoration: BoxDecoration(
+                          color: ui.val(2),
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                        child: ListView.builder(
+                            itemCount: item.orderDetails.length,
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) {
+                              return Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        child: Text(
+                                            '${item.orderDetails[index].quantity} x'), // quantity
+                                        padding: EdgeInsets.all(5),
+                                        margin:
+                                            EdgeInsets.only(right: 10, top: 5),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey,
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(20)),
+                                        ),
                                       ),
-                                    ),
-                                    Text(item.orderDetails[index].name, // item
+                                      Text(
+                                        item.orderDetails[index].name, // item
                                         style: TextStyle(
                                           fontSize: 20,
                                           color: Colors.white,
-                                        )),
-                                  ],
-                                ),
-                                Text(
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
                                     'Rs ${item.orderDetails[index].price}', // item price
                                     style: TextStyle(
                                       fontSize: 20,
                                       color: Colors.white,
-                                    )),
-                              ],
-                            );
-                          })),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: Container(
-                            padding: EdgeInsets.only(
-                                right: 25, top: 10, bottom: 10, left: 10),
-                            alignment: Alignment.centerRight,
-                            child: Text('Rs ${item.price}', // tot price
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: EdgeInsets.only(
+                                  right: 25, top: 10, bottom: 10, left: 10),
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                'Rs ${item.price}', // tot price
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
-                                ))),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

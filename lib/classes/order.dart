@@ -9,7 +9,7 @@ class Order {
   final int price;
   late List<OrderDetails> orderDetails = [];
 
-  Order({required this.orderID, required this.status, required this.price}) {
+  Order({required this.orderID, required this.status, required this.price, required this.orderDetails,}) {
     // getOrderDetails(orderID);
   }
 
@@ -34,44 +34,83 @@ class Order {
     Fetches all orders of a specific restaurant
     and displays it onto homepage for employee to foresee
   */
-  static Future<List<Order>> getPendingOrders(int restaurantID) async {
-    List<Order> ordersList = [];
+  // static Future<List<Order>> getPendingOrders(int restaurantID) async {
+  //   List<Order> ordersList = [];
 
+  //   try {
+  //     // Reference to the "orders" collection, filtering by restaurantID
+  //     Query<Map<String, dynamic>> ordersQuery =
+  //         FirebaseFirestore.instance.collection('orders');
+  //     // .where('restaurantID', isEqualTo: "eWjuiXzb15xfWxNnEZai");
+
+  //     // Get documents from the filtered query
+  //     QuerySnapshot ordersSnapshot = await ordersQuery.get();
+  //     print("aaa");
+  //     // Iterate through each document
+  //     for (QueryDocumentSnapshot orderDocument in ordersSnapshot.docs) {
+  //       // Get document data as Map
+  //       Map<String, dynamic> orderData =
+  //           orderDocument.data() as Map<String, dynamic>;
+
+  //       print(orderData);
+
+  //       // Create an Order object from the retrieved data
+  //       Order order = Order(
+  //         // orderID: orderData['orderID'] as int,
+  //         orderID: orderDocument.id as String,
+  //         status: orderData['status'] as String,
+  //         price: orderData['price'] as int,
+  //       );
+  //       print("order: $order ");
+
+  //       order.getOrderDetails(orderData['Food items']);
+
+  //       ordersList.add(order);
+  //     }
+
+  //     return ordersList;
+  //   } catch (error) {
+  //     print('Error fetching orders: $error');
+  //     return [];
+  //   }
+  // }
+
+  static Stream<List<Order>> getRealTimeOrders(int restaurantID) {
     try {
-      // Reference to the "orders" collection, filtering by restaurantID
-      Query<Map<String, dynamic>> ordersQuery =
+      CollectionReference ordersCollection =
           FirebaseFirestore.instance.collection('orders');
-      // .where('restaurantID', isEqualTo: "eWjuiXzb15xfWxNnEZai");
 
-      // Get documents from the filtered query
-      QuerySnapshot ordersSnapshot = await ordersQuery.get();
-      print("aaa");
-      // Iterate through each document
-      for (QueryDocumentSnapshot orderDocument in ordersSnapshot.docs) {
-        // Get document data as Map
-        Map<String, dynamic> orderData =
-            orderDocument.data() as Map<String, dynamic>;
+      // Use the snapshots() method to get a stream of document snapshots
+      // data is filtered here
+      return ordersCollection
+          // .where('restaurant_id', isEqualTo: restaurantID)
+          .where('status', whereIn: ["pending", "processing"])
+          .snapshots()
+          .map((querySnapshot) {
+            // Convert each document snapshot to an Order object
+            return querySnapshot.docs.map((orderDocument) {
+              Map<String, dynamic> orderData =
+                  orderDocument.data() as Map<String, dynamic>;
 
-        print(orderData);
+              print("order data: $orderData");
 
-        // Create an Order object from the retrieved data
-        Order order = Order(
-          // orderID: orderData['orderID'] as int,
-          orderID: orderDocument.id as String,
-          status: orderData['status'] as String,
-          price: orderData['price'] as int,
-        );
-        print("order: $order ");
 
-        order.getOrderDetails(orderData['Food items']);
+              // Extract Food items from the order data
+              List<OrderDetails> orderDetailsList = getOrderDetails(orderData['Food items']);
 
-        ordersList.add(order);
-      }
-
-      return ordersList;
+              return Order(
+                orderID: orderDocument.id,
+                status: orderData['status'] ?? '',
+                price: orderData['price'] ?? 0,
+                orderDetails: orderDetailsList,
+                // ... other fields ...
+              );
+            }).toList();
+          });
     } catch (error) {
-      print('Error fetching orders: $error');
-      return [];
+      print('Error fetching real-time orders: $error');
+      // Handle the error as needed
+      return Stream.value([]);
     }
   }
 
@@ -79,30 +118,33 @@ class Order {
       Function iterates a single order document and gets stores all fooditems inside
       into a Order class's member variable List:orderDetails 
   */
-  void getOrderDetails(Map<String, dynamic> foodItems) {
-    List<OrderDetails> ordDetails = [];
+  static List<OrderDetails> getOrderDetails(Map<String, dynamic> foodItemsData) {
+    List<OrderDetails> orderDetailsList = [];
 
-    foodItems.forEach((foodItemName, foodItemData) {
-      ordDetails.add(OrderDetails(
-          name: foodItemName,
-          quantity: foodItemData['Quantity'],
-          price: foodItemData['Price']));
-
-        print('$foodItemName:');
-        print('  Price: ${foodItemData['Price']}');
-        print('  Quantity: ${foodItemData['Quantity']}');   
+    foodItemsData.forEach((itemName, itemData) {
+      orderDetailsList.add(OrderDetails(
+        name: itemName,
+        quantity: itemData['Quantity'],
+        price: itemData['Price'],
+      ));
     });
 
-    orderDetails = ordDetails;
+    return orderDetailsList;
   }
 
 
+  /*
+      Updates an orders status from:
+      pending -> processing
+      processing -> completed
+
+      can be put to (anystate) -> deleted at any instance
+  */
   static Future<void> updateStatus(String orderId, String status) async {
     try {
       // Get a reference to the specific order document
-      DocumentReference orderRef = FirebaseFirestore.instance
-          .collection('orders')
-          .doc(orderId);
+      DocumentReference orderRef =
+          FirebaseFirestore.instance.collection('orders').doc(orderId);
 
       // Update the "status" field to "deleted"
       await orderRef.update({'status': status});

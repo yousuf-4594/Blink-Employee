@@ -92,7 +92,7 @@ class Order {
               Map<String, dynamic> orderData =
                   orderDocument.data() as Map<String, dynamic>;
 
-              print("order data: $orderData");
+              // print("order data: $orderData");
 
 
               // Extract Food items from the order data

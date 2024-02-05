@@ -1,12 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/mysql.dart';
 import 'package:mysql_client/mysql_client.dart';
 import 'package:food_delivery_restraunt/classes/UiColor.dart';
 import 'package:flutter/services.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../classes/restaurant.dart';
-
-
 
 /*
     Represents Edit menu bottom navigation screen
@@ -22,6 +22,7 @@ class MenuScreen extends StatefulWidget {
   State<MenuScreen> createState() => _CartScreenState();
 }
 
+// Each category object has many MenuItem objects
 class Category {
   final int categoryID;
   final String categoryName;
@@ -49,15 +50,14 @@ class MenuItem {
 late List<Category> itemList = [];
 
 class _CartScreenState extends State<MenuScreen> {
-  int categoryExists(List<Category> temp, int categoryID) {
+  int categoryExists(List<Category> temp, String categoryName) {
     for (int i = 0; i < temp.length; i++) {
-      if (temp[i].categoryID == categoryID) {
+      if (temp[i].categoryName == categoryName) {
         return i;
       }
     }
     return -1;
   }
-
 
   /* 
       Fetches products name, price categorically from database
@@ -96,38 +96,75 @@ class _CartScreenState extends State<MenuScreen> {
   //   });
   // }
 
+  /*
+      This function fetches values from:
+      restaurants collection and searches in logged in this restaurant's document
+      restaurant's document ka sub collection is searched and every food product's document is fetched
+      the retrieved values are organized asper the class structure:
+        category1
+          |_ food item1
+          |_ food item2
 
+        category2
+          |_ food item1
+          |_ food item2
+  */
   void getCategory() async {
     List<Category> temp = [];
-    var db = Mysql();
-    Iterable<ResultSetRow> rows = await db.getResults(
-        'SELECT P.product_id, P.name AS p_name, P.price, C.category_id, C.name AS c_name FROM Product P INNER JOIN Category C ON (P.category_id = C.category_id) WHERE P.restaurant_id=${widget.restaurant.restaurantID};');
 
-    for (var row in rows) {
-      int index = categoryExists(temp, int.parse(row.assoc()['category_id']!));
-      if (index >= 0) {
-        temp[index].items.add(MenuItem(
+    try {
+      // Reference to the "restaurant" document for the specific restaurant
+      DocumentReference restaurantDocumentRef =
+          FirebaseFirestore.instance.collection('restaurants')
+              .doc("eWjuiXzb15xfWxNnEZai"); // Replace with the actual restaurant ID
+
+      // Reference to the "foodItems" subcollection inside the restaurant document
+      CollectionReference foodItemsCollection =
+          restaurantDocumentRef.collection('foodItems');
+
+      // Get documents from the "foodItems" subcollection
+      QuerySnapshot foodItemsSnapshot = await foodItemsCollection.get();
+
+      // Iterate through each food item document
+      for (QueryDocumentSnapshot foodItemDocument in foodItemsSnapshot.docs) {
+        Map<String, dynamic> foodItemData =
+            foodItemDocument.data() as Map<String, dynamic>;
+
+        String categoryName = foodItemData['Category Name'];
+
+        int index = categoryExists(temp, categoryName);
+        if (index >= 0) {
+          temp[index].items.add(MenuItem(
             image: 'images/kfc.jpg',
-            title: row.assoc()['p_name']!,
-            price: int.parse(row.assoc()['price']!),
-            productID: int.parse(row.assoc()['product_id']!)));
-      } else {
-        temp.add(Category(
-            categoryName: row.assoc()['c_name']!,
-            items: <MenuItem>[],
-            categoryID: int.parse(row.assoc()['category_id']!)));
-        int i = categoryExists(temp, int.parse(row.assoc()['category_id']!));
-        temp[i].items.add(MenuItem(
-            image: 'images/kfc.jpg',
-            title: row.assoc()['p_name']!,
-            price: int.parse(row.assoc()['price']!),
-            productID: int.parse(row.assoc()['product_id']!)));
+            title: foodItemData['Prod Name'],
+            price: foodItemData['Price'],
+            // productID: int.parse(foodItemDocument.id),
+            productID: Random().nextInt(10000),
+          ));
+        } else {
+          temp.add(Category(
+            categoryID: 100,
+            categoryName: categoryName,
+            items: <MenuItem>[
+              MenuItem(
+                image: 'images/kfc.jpg',
+                title: foodItemData['Prod Name'],
+                price: foodItemData['Price'],
+                // productID: int.parse(foodItemDocument.id),
+                productID: Random().nextInt(10000),
+              ),
+            ],
+          ));
+        }
       }
-    }
 
-    setState(() {
-      itemList = temp;
-    });
+      setState(() {
+        itemList = temp;
+      });
+    } catch (error) {
+      print('Error fetching data: $error');
+      // Handle the error as needed
+    }
   }
 
   @override
@@ -137,11 +174,8 @@ class _CartScreenState extends State<MenuScreen> {
     getCategory();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: ui.val(0),
 
@@ -236,12 +270,9 @@ class CategoryWidget extends StatefulWidget {
 }
 
 class _CategoryWidgetState extends State<CategoryWidget> {
-
   // edit mode is when checkboxes are displayed
   bool isEditMode = true;
   List<bool> foodSelected = [];
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -316,8 +347,6 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                   TextEditingController(text: '${item.price}');
 
               if (isEditMode) {
-
-
                 return GestureDetector(
                   onTap: () {
                     print(index);

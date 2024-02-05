@@ -15,6 +15,9 @@ import 'package:food_delivery_restraunt/classes/UiColor.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+
+
 class LoginScreen extends StatefulWidget {
   static const id = 'login_screen';
 
@@ -23,6 +26,8 @@ class LoginScreen extends StatefulWidget {
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
+
+
 
 class _LoginScreenState extends State<LoginScreen> {
   var username;
@@ -39,6 +44,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   var db = Mysql();
+
+
+
 
   Future<bool> _login(String username, String password) async {
     // var conn = await db.getConnection();
@@ -59,6 +67,8 @@ class _LoginScreenState extends State<LoginScreen> {
       return false;
     }
   }
+
+
 
   void getRestaurants() async {
     Iterable<ResultSetRow> rows = await db

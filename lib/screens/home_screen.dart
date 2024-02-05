@@ -212,32 +212,12 @@ class OrderListView extends StatefulWidget {
 class _OrderListViewState extends State<OrderListView> {
   late Stream<List<Order>> ordersStream;
 
-  // void getOrders() async {
-  //   List<Order> tempOrders = await Order.getPendingOrders(widget.restaurantID);
-  //   if (this.mounted) {
-  //     setState(() {
-  //       orders = tempOrders;
-  //     });
-  //   }
-  // }
-
   @override
   void initState() {
     super.initState();
     ordersStream = Order.getRealTimeOrders(widget.restaurantID);
   }
 
-  // late var timer;
-
-  // @override
-  // void dispose() {
-  //   timer.cancel();
-  //   super.dispose();
-  // }
-
-  /*
-    Displays list of restaurants orders 
-  */
   /*
     Displays list of restaurant orders 
   */
@@ -251,7 +231,18 @@ class _OrderListViewState extends State<OrderListView> {
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('No orders available.'));
+          return Container(
+            margin: EdgeInsets.only(top: 30),
+            width: MediaQuery.of(context).size.width,
+            alignment: AlignmentDirectional.topCenter,
+            child: Text(
+              'No orders available',
+              style: TextStyle(
+                fontSize: 15,
+                color: ui.val(4).withOpacity(0.6),
+              ),
+            ),
+          );
         }
 
         List<Order> orders = snapshot.data!;
@@ -397,6 +388,7 @@ class _OrderListViewState extends State<OrderListView> {
                           borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
                         child: ListView.builder(
+                            physics: NeverScrollableScrollPhysics(),
                             itemCount: item.orderDetails.length,
                             shrinkWrap: true,
                             itemBuilder: (context, index) {
@@ -409,10 +401,14 @@ class _OrderListViewState extends State<OrderListView> {
                                     children: [
                                       Container(
                                         child: Text(
-                                            '${item.orderDetails[index].quantity} x'), // quantity
+                                          '${item.orderDetails[index].quantity} x',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ), // quantity
                                         padding: EdgeInsets.all(5),
-                                        margin:
-                                            EdgeInsets.only(right: 10, top: 5),
+                                        margin: EdgeInsets.only(
+                                            top: 3, right: 5, bottom: 3),
                                         decoration: BoxDecoration(
                                           color: Colors.grey,
                                           borderRadius: BorderRadius.all(

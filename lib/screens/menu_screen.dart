@@ -320,6 +320,33 @@ Future<void> addFoodItem(String restaurantID, String categoryName,
   }
 }
 
+Future<void> deleteFoodItem(String restaurantID, String foodItemID) async {
+  try {
+    // Reference to the "restaurants" collection
+    CollectionReference restaurantsCollection =
+        FirebaseFirestore.instance.collection('restaurants');
+
+    // Reference to the specific restaurant document
+    DocumentReference restaurantDocumentRef =
+        restaurantsCollection.doc(restaurantID);
+
+    // Reference to the "foodItems" subcollection inside the restaurant document
+    CollectionReference foodItemsCollection =
+        restaurantDocumentRef.collection('foodItems');
+
+    // Reference to the specific food item document by ID
+    DocumentReference foodItemDocumentRef = foodItemsCollection.doc(foodItemID);
+
+    // Delete the document from the "foodItems" subcollection
+    await foodItemDocumentRef.delete();
+
+    print('Food item deleted successfully!');
+  } catch (error) {
+    print('Error deleting food item: $error');
+    // Handle the error as needed
+  }
+}
+
 /*
     Displays the categorical divisions of food items on edit menu
 */
@@ -385,7 +412,16 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                 ),
                 if (!isEditMode)
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      for (int i = 0; i < foodSelected.length; i++) {
+                        if (foodSelected[i]) {
+                          // print(widget.disp.items[i].productID);
+                          deleteFoodItem("eWjuiXzb15xfWxNnEZai",
+                              widget.disp.items[i].productID);
+                        }
+                      }
+                      // print(foodSelected);
+                    },
                     child: Text(
                       'delete',
                       style: TextStyle(

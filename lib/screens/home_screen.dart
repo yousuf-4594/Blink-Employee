@@ -264,11 +264,14 @@ class _OrderListViewState extends State<OrderListView> {
                 orders[index].status == 'pending'
                     ? SlidableAction(
                         onPressed: (context) {
-                          var db = Mysql();
-                          db.deleteOrder(orders[index].orderID);
+                          // var db = Mysql();
+                          // db.deleteOrder(orders[index].orderID);
+                          
+                          Order.updateStatus(orders[index].orderID, 'deleted');
                           setState(() {
                             orders.removeAt(index);
                           });
+
                         },
                         autoClose: true,
                         borderRadius: BorderRadius.circular(20),
@@ -284,10 +287,12 @@ class _OrderListViewState extends State<OrderListView> {
                     ? SlidableAction(
                         onPressed: (context) {
                           setState(() {
-                            // orders.removeAt(index);
-                            var db = Mysql();
-                            db.updateOrderStatus(
-                                orders[index].orderID, "processing");
+                          //   // orders.removeAt(index);
+                          //   var db = Mysql();
+                          //   db.updateOrderStatus(
+                          //       orders[index].orderID, "processing");
+
+                            Order.updateStatus(orders[index].orderID, 'processing');
                             setState(() {
                               orders[index].status = 'processing';
                             });
@@ -302,10 +307,12 @@ class _OrderListViewState extends State<OrderListView> {
                     : SlidableAction(
                         onPressed: (context) {
                           setState(() {
-                            // orders.removeAt(index);
-                            var db = Mysql();
-                            db.updateOrderStatus(
-                                orders[index].orderID, "completed");
+                          //   // orders.removeAt(index);
+                          //   var db = Mysql();
+                          //   db.updateOrderStatus(
+                          //       orders[index].orderID, "completed");
+
+                           Order.updateStatus(orders[index].orderID, 'completed');
                             setState(() {
                               orders[index].status = 'completed';
                               orders.removeAt(index);

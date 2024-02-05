@@ -4,7 +4,7 @@ import 'package:food_delivery_restraunt/classes/order_details.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Order {
-  final int orderID;
+  final String orderID;
   late String status;
   final int price;
   late List<OrderDetails> orderDetails = [];
@@ -57,7 +57,7 @@ class Order {
         // Create an Order object from the retrieved data
         Order order = Order(
           // orderID: orderData['orderID'] as int,
-          orderID: 100,
+          orderID: orderDocument.id as String,
           status: orderData['status'] as String,
           price: orderData['price'] as int,
         );
@@ -88,12 +88,30 @@ class Order {
           quantity: foodItemData['Quantity'],
           price: foodItemData['Price']));
 
-       print('$foodItemName:');
-    print('  Price: ${foodItemData['Price']}');
-    print('  Quantity: ${foodItemData['Quantity']}');   
+        print('$foodItemName:');
+        print('  Price: ${foodItemData['Price']}');
+        print('  Quantity: ${foodItemData['Quantity']}');   
     });
 
     orderDetails = ordDetails;
+  }
+
+
+  static Future<void> updateStatus(String orderId, String status) async {
+    try {
+      // Get a reference to the specific order document
+      DocumentReference orderRef = FirebaseFirestore.instance
+          .collection('orders')
+          .doc(orderId);
+
+      // Update the "status" field to "deleted"
+      await orderRef.update({'status': status});
+
+      print('Order status updated to ${status} successfully!');
+    } catch (error) {
+      print('Error updating order status: $error');
+      // Handle the error appropriately, e.g., show an error message to the user
+    }
   }
 
   // void getOrderDetails(int orderID) async {

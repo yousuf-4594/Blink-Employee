@@ -58,6 +58,45 @@ class _CartScreenState extends State<MenuScreen> {
     return -1;
   }
 
+
+  /* 
+      Fetches products name, price categorically from database
+      stores category into list<Category> temp 
+  */
+  // void getCategory() async {
+  //   List<Category> temp = [];
+  //   var db = Mysql();
+  //   Iterable<ResultSetRow> rows = await db.getResults(
+  //       'SELECT P.product_id, P.name AS p_name, P.price, C.category_id, C.name AS c_name FROM Product P INNER JOIN Category C ON (P.category_id = C.category_id) WHERE P.restaurant_id=${widget.restaurant.restaurantID};');
+
+  //   for (var row in rows) {
+  //     int index = categoryExists(temp, int.parse(row.assoc()['category_id']!));
+  //     if (index >= 0) {
+  //       temp[index].items.add(MenuItem(
+  //           image: 'images/kfc.jpg',
+  //           title: row.assoc()['p_name']!,
+  //           price: int.parse(row.assoc()['price']!),
+  //           productID: int.parse(row.assoc()['product_id']!)));
+  //     } else {
+  //       temp.add(Category(
+  //           categoryName: row.assoc()['c_name']!,
+  //           items: <MenuItem>[],
+  //           categoryID: int.parse(row.assoc()['category_id']!)));
+  //       int i = categoryExists(temp, int.parse(row.assoc()['category_id']!));
+  //       temp[i].items.add(MenuItem(
+  //           image: 'images/kfc.jpg',
+  //           title: row.assoc()['p_name']!,
+  //           price: int.parse(row.assoc()['price']!),
+  //           productID: int.parse(row.assoc()['product_id']!)));
+  //     }
+  //   }
+
+  //   setState(() {
+  //     itemList = temp;
+  //   });
+  // }
+
+
   void getCategory() async {
     List<Category> temp = [];
     var db = Mysql();
@@ -278,7 +317,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
 
               if (isEditMode) {
 
-                
+
                 return GestureDetector(
                   onTap: () {
                     print(index);

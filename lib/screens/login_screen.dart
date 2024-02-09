@@ -15,9 +15,6 @@ import 'package:food_delivery_restraunt/classes/UiColor.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
-
 class LoginScreen extends StatefulWidget {
   static const id = 'login_screen';
 
@@ -26,8 +23,6 @@ class LoginScreen extends StatefulWidget {
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
-
-
 
 class _LoginScreenState extends State<LoginScreen> {
   var username;
@@ -44,9 +39,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   var db = Mysql();
-
-
-
 
   Future<bool> _login(String username, String password) async {
     // var conn = await db.getConnection();
@@ -68,8 +60,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-
-
   void getRestaurants() async {
     Iterable<ResultSetRow> rows = await db
         .getResults('SELECT restaurant_id, name, owner_name FROM Restaurant;');
@@ -83,7 +73,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   late TextEditingController _usernameTextController;
   late TextEditingController _passwordTextController;
-
 
   void getSharedPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -115,12 +104,10 @@ class _LoginScreenState extends State<LoginScreen> {
     initializeTextControllers();
   }
 
-
   Future<void> initializeTextControllers() async {
     _usernameTextController.text = await getUsername() ?? '';
     _passwordTextController.text = await getPassword() ?? '';
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -265,30 +252,30 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 SizedBox(
-                  height: 20,
+                  height: 55,
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Divider(),
-                    ),
-                    SizedBox(
-                      width: 15,
-                    ),
-                    Text(
-                      "or continue with",
-                    ),
-                    SizedBox(
-                      width: 15,
-                    ),
-                    Expanded(
-                      child: Divider(),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 20,
-                ),
+                // Row(
+                //   children: [
+                //     Expanded(
+                //       child: Divider(),
+                //     ),
+                //     SizedBox(
+                //       width: 15,
+                //     ),
+                //     Text(
+                //       "or continue with",
+                //     ),
+                //     SizedBox(
+                //       width: 15,
+                //     ),
+                //     Expanded(
+                //       child: Divider(),
+                //     ),
+                //   ],
+                // ),
+                // SizedBox(
+                //   height: 20,
+                // ),
                 LargeButton(
                   onPressed: () {},
                   color: ui.val(1).withOpacity(0.3),

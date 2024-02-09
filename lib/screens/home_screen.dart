@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/classes/order.dart';
 import 'package:food_delivery_restraunt/classes/restaurant.dart';
@@ -156,10 +156,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                 ],
+                                dividerColor: Colors.transparent,
                                 labelColor: Color.fromARGB(255, 0, 0, 0),
                                 unselectedLabelColor:
                                     Color.fromARGB(255, 255, 255, 255),
                                 isScrollable: false,
+                                indicatorSize: TabBarIndicatorSize.tab,
                                 indicator: BoxDecoration(
                                   borderRadius: BorderRadius.circular(30),
                                   color: ui.val(10),
@@ -179,6 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               OrderListView(
                                 restaurantID: widget.restaurant.restaurantID,
+                                restaurantName: widget.restaurant.name,
                                 status: 'all',
                               ),
                             ],
@@ -200,10 +203,14 @@ class _HomeScreenState extends State<HomeScreen> {
 class OrderListView extends StatefulWidget {
   final String status;
   final int restaurantID;
+  final String restaurantName;
 
-  const OrderListView(
-      {Key? key, required this.status, required this.restaurantID})
-      : super(key: key);
+  const OrderListView({
+    Key? key,
+    required this.status,
+    required this.restaurantID,
+    required this.restaurantName,
+  }) : super(key: key);
 
   @override
   _OrderListViewState createState() => _OrderListViewState();
@@ -227,7 +234,12 @@ class _OrderListViewState extends State<OrderListView> {
       stream: ordersStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // or any loading indicator
+          return Container(
+            height: 50,
+            child: CircularProgressIndicator(
+              color: Colors.white70,
+            ),
+          );
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -246,7 +258,7 @@ class _OrderListViewState extends State<OrderListView> {
         }
 
         List<Order> orders = snapshot.data!;
-
+        print(orders);
         return ListView.builder(
           physics: NeverScrollableScrollPhysics(),
           itemCount: orders.length,
@@ -287,10 +299,6 @@ class _OrderListViewState extends State<OrderListView> {
                             onPressed: (context) {
                               Order.updateStatus(
                                   orders[index].orderID, 'processing');
-
-                              // setState(() {
-                              //   orders[index].status = 'processing';
-                              // });
                             },
                             autoClose: true,
                             borderRadius: BorderRadius.circular(20),
@@ -302,10 +310,26 @@ class _OrderListViewState extends State<OrderListView> {
                             onPressed: (context) {
                               Order.updateStatus(
                                   orders[index].orderID, 'completed');
-                              // setState(() {
-                              //   orders[index].status = 'completed';
-                              //   orders.removeAt(index);
-                              // });
+
+                              print(
+                                  "order completed: ${orders[index].customerID}");
+                              print("   ${widget.restaurantID}");
+                              print("   ${widget.restaurantName}");
+                              firestore.DocumentReference customerRef =
+                                  firestore.FirebaseFirestore.instance
+                                      .collection('customers')
+                                      .doc(orders[index].customerID);
+
+                              customerRef.update({
+                                'Review.Placed': false,
+                                'Review.Restaurant ID':
+                                    "eWjuiXzb15xfWxNnEZai", // sufiyaan idhr dekho
+                                'Review.Restaurant Name': widget.restaurantName,
+                              }).then((value) {
+                                print('Review updated successfully');
+                              }).catchError((error) {
+                                print('Error updating review: $error');
+                              });
                             },
                             autoClose: true,
                             borderRadius: BorderRadius.circular(20),

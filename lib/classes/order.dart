@@ -7,9 +7,16 @@ class Order {
   final String orderID;
   late String status;
   final int price;
+  final String customerID;
   late List<OrderDetails> orderDetails = [];
 
-  Order({required this.orderID, required this.status, required this.price, required this.orderDetails,}) {
+  Order({
+    required this.orderID,
+    required this.status,
+    required this.price,
+    required this.customerID,
+    required this.orderDetails,
+  }) {
     // getOrderDetails(orderID);
   }
 
@@ -92,18 +99,36 @@ class Order {
               Map<String, dynamic> orderData =
                   orderDocument.data() as Map<String, dynamic>;
 
-              // print("order data: $orderData");
-
+              print("order data: ${orderData['price']}");
 
               // Extract Food items from the order data
-              List<OrderDetails> orderDetailsList = getOrderDetails(orderData['Food items']);
+              List<OrderDetails> orderDetailsList = [];
+
+              orderData['Food items'].forEach((foodItem) {
+                // Iterate over each map in the array
+                foodItem.forEach((foodName, foodData) {
+                  // Extract Quantity and Price from the map
+                  int quantity = foodData['Quantity'];
+                  double price = foodData['Price'].toDouble();
+                  print("a");
+
+                  print('$foodName - Quantity: $quantity, Price: $price');
+                  orderDetailsList.add(OrderDetails(
+                    name: foodName,
+                    quantity: foodData['Quantity'],
+                    price: foodData['Price'],
+                  ));
+                });
+              });
+
+              print("eeo: $orderDetailsList");
 
               return Order(
                 orderID: orderDocument.id,
                 status: orderData['status'] ?? '',
                 price: orderData['price'] ?? 0,
+                customerID: orderData['customerid'],
                 orderDetails: orderDetailsList,
-                // ... other fields ...
               );
             }).toList();
           });
@@ -118,7 +143,8 @@ class Order {
       Function iterates a single order document and gets stores all fooditems inside
       into a Order class's member variable List:orderDetails 
   */
-  static List<OrderDetails> getOrderDetails(Map<String, dynamic> foodItemsData) {
+  static List<OrderDetails> getOrderDetails(
+      Map<String, dynamic> foodItemsData) {
     List<OrderDetails> orderDetailsList = [];
 
     foodItemsData.forEach((itemName, itemData) {
@@ -131,7 +157,6 @@ class Order {
 
     return orderDetailsList;
   }
-
 
   /*
       Updates an orders status from:

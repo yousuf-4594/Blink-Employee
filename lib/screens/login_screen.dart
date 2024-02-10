@@ -13,6 +13,7 @@ import 'package:food_delivery_restraunt/classes/restaurant.dart';
 import 'package:food_delivery_restraunt/arguments/home_screen_arguments.dart';
 import 'package:food_delivery_restraunt/classes/UiColor.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   static const id = 'login_screen';
@@ -24,10 +25,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  late String username;
+  var username;
   late String ownerName;
   List<Restaurant> restaurants = [];
-  late String password;
+  var password;
   bool loginValid = true;
   String loginFailedMessage = '';
   late int loginID;
@@ -68,6 +69,44 @@ class _LoginScreenState extends State<LoginScreen> {
           name: row.assoc()['name']!,
           ownerName: row.assoc()['owner_name']!));
     }
+  }
+
+  late TextEditingController _usernameTextController;
+  late TextEditingController _passwordTextController;
+
+  void getSharedPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username')!;
+      password = prefs.getString('password')!;
+      print("username " + username);
+      print("password " + password);
+    });
+  }
+
+  Future<String?> getUsername() async {
+    SharedPreferences signPrefs = await SharedPreferences.getInstance();
+    username = signPrefs.get('username2');
+    return username;
+  }
+
+  Future<String?> getPassword() async {
+    SharedPreferences signPrefs = await SharedPreferences.getInstance();
+    password = signPrefs.get('password2');
+    return password;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameTextController = TextEditingController();
+    _passwordTextController = TextEditingController();
+    initializeTextControllers();
+  }
+
+  Future<void> initializeTextControllers() async {
+    _usernameTextController.text = await getUsername() ?? '';
+    _passwordTextController.text = await getPassword() ?? '';
   }
 
   @override
@@ -125,6 +164,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   onChange: (text) {
                     username = text;
                   },
+                  labelText: 'Username',
+                  controller: _usernameTextController,
                 ),
                 SizedBox(
                   height: 25,
@@ -134,6 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onChange: (text) {
                     password = text;
                   },
+                  controller: _passwordTextController,
                 ),
                 SizedBox(
                   height: 20,
@@ -175,6 +217,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       setState(() {
                         loginFailedMessage = '';
                       });
+                      final SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      await prefs.setString('username2', username);
+                      await prefs.setString('password2', password);
                       getRestaurants();
                       Restaurant restaurant = Restaurant(
                           restaurantID: loginID,
@@ -206,30 +252,30 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 SizedBox(
-                  height: 20,
+                  height: 55,
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Divider(),
-                    ),
-                    SizedBox(
-                      width: 15,
-                    ),
-                    Text(
-                      "or continue with",
-                    ),
-                    SizedBox(
-                      width: 15,
-                    ),
-                    Expanded(
-                      child: Divider(),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 20,
-                ),
+                // Row(
+                //   children: [
+                //     Expanded(
+                //       child: Divider(),
+                //     ),
+                //     SizedBox(
+                //       width: 15,
+                //     ),
+                //     Text(
+                //       "or continue with",
+                //     ),
+                //     SizedBox(
+                //       width: 15,
+                //     ),
+                //     Expanded(
+                //       child: Divider(),
+                //     ),
+                //   ],
+                // ),
+                // SizedBox(
+                //   height: 20,
+                // ),
                 LargeButton(
                   onPressed: () {},
                   color: ui.val(1).withOpacity(0.3),

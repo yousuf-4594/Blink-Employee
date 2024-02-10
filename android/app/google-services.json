@@ -1,0 +1,76 @@
+{
+  "project_info": {
+    "project_number": "317819475568",
+    "project_id": "blink-a34ae",
+    "storage_bucket": "blink-a34ae.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:317819475568:android:c6b56d25db7e939fbb86b5",
+        "android_client_info": {
+          "package_name": "com.example.food_delivery"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "317819475568-m51shhj986f6ktn970uu1vpv7jp9id98.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.food_delivery",
+            "certificate_hash": "f91250701b4122466674efd01eea1415e26c3fe0"
+          }
+        },
+        {
+          "client_id": "317819475568-qv882hdm6l4hted933hjh247pk042kc3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTu18SNNCFOzTuY-HeHJ34xk8LMy-riuw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "317819475568-qv882hdm6l4hted933hjh247pk042kc3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:317819475568:android:738c1e9d324e3536bb86b5",
+        "android_client_info": {
+          "package_name": "com.example.food_delivery_restraunt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "317819475568-qv882hdm6l4hted933hjh247pk042kc3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTu18SNNCFOzTuY-HeHJ34xk8LMy-riuw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "317819475568-qv882hdm6l4hted933hjh247pk042kc3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,10 +1,36 @@
+// import 'dart:js_util';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/mysql.dart';
 import 'package:mysql_client/mysql_client.dart';
 import 'package:food_delivery_restraunt/classes/UiColor.dart';
 import 'package:flutter/services.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../classes/restaurant.dart';
+
+/*
+    Represents Edit menu bottom navigation screen
+    here we can add / delete / update menu items from database
+
+*/
+// a global key is assigned to our parent scaffold to allow snackbars to be displayed within its context
+final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+void snackbar(String content) {
+  ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(
+    SnackBar(
+      duration: Duration(seconds: 1),
+      content: Text(content),
+      action: SnackBarAction(
+        label: 'Close',
+        onPressed: () {
+          // Code to execute.
+        },
+      ),
+    ),
+  );
+}
 
 class MenuScreen extends StatefulWidget {
   final Restaurant restaurant;
@@ -14,6 +40,7 @@ class MenuScreen extends StatefulWidget {
   State<MenuScreen> createState() => _CartScreenState();
 }
 
+// Each category object has many MenuItem objects
 class Category {
   final int categoryID;
   final String categoryName;
@@ -27,7 +54,7 @@ class Category {
 
 class MenuItem {
   final String image;
-  final int productID;
+  final String productID;
   final String title;
   final int price;
 
@@ -41,59 +68,99 @@ class MenuItem {
 late List<Category> itemList = [];
 
 class _CartScreenState extends State<MenuScreen> {
-  int categoryExists(List<Category> temp, int categoryID) {
+  int categoryExists(List<Category> temp, String categoryName) {
     for (int i = 0; i < temp.length; i++) {
-      if (temp[i].categoryID == categoryID) {
+      if (temp[i].categoryName == categoryName) {
         return i;
       }
     }
     return -1;
   }
 
+  /*
+      This function fetches values from:
+      restaurants collection and searches in logged in this restaurant's document
+      restaurant's document ka sub collection is searched and every food product's document is fetched
+      the retrieved values are organized asper the class structure:
+        category1
+          |_ food item1
+          |_ food item2
+
+        category2
+          |_ food item1
+          |_ food item2
+  */
+
   void getCategory() async {
     List<Category> temp = [];
-    var db = Mysql();
-    Iterable<ResultSetRow> rows = await db.getResults(
-        'SELECT P.product_id, P.name AS p_name, P.price, C.category_id, C.name AS c_name FROM Product P INNER JOIN Category C ON (P.category_id = C.category_id) WHERE P.restaurant_id=${widget.restaurant.restaurantID};');
 
-    for (var row in rows) {
-      int index = categoryExists(temp, int.parse(row.assoc()['category_id']!));
-      if (index >= 0) {
-        temp[index].items.add(MenuItem(
-            image: 'images/kfc.jpg',
-            title: row.assoc()['p_name']!,
-            price: int.parse(row.assoc()['price']!),
-            productID: int.parse(row.assoc()['product_id']!)));
-      } else {
-        temp.add(Category(
-            categoryName: row.assoc()['c_name']!,
-            items: <MenuItem>[],
-            categoryID: int.parse(row.assoc()['category_id']!)));
-        int i = categoryExists(temp, int.parse(row.assoc()['category_id']!));
-        temp[i].items.add(MenuItem(
-            image: 'images/kfc.jpg',
-            title: row.assoc()['p_name']!,
-            price: int.parse(row.assoc()['price']!),
-            productID: int.parse(row.assoc()['product_id']!)));
+    try {
+      // Reference to the "restaurant" document for the specific restaurant
+      DocumentReference restaurantDocumentRef = FirebaseFirestore.instance
+          .collection('restaurants')
+          .doc("eWjuiXzb15xfWxNnEZai"); // Replace with the actual restaurant ID
+
+      // Reference to the "foodItems" subcollection inside the restaurant document
+      CollectionReference foodItemsCollection =
+          restaurantDocumentRef.collection('foodItems');
+
+      // Get documents from the "foodItems" subcollection
+      QuerySnapshot foodItemsSnapshot = await foodItemsCollection.get();
+
+      // Iterate through each food item document
+      for (QueryDocumentSnapshot foodItemDocument in foodItemsSnapshot.docs) {
+        Map<String, dynamic> foodItemData =
+            foodItemDocument.data() as Map<String, dynamic>;
+
+        String categoryName = foodItemData['Category Name'];
+
+        int index = categoryExists(temp, categoryName);
+        if (index >= 0) {
+          temp[index].items.add(MenuItem(
+                image: 'images/kfc.jpg',
+                title: foodItemData['Prod Name'],
+                price: foodItemData['Price'],
+                productID: foodItemDocument.id,
+              ));
+        } else {
+          temp.add(Category(
+            categoryID: 100,
+            categoryName: categoryName,
+            items: <MenuItem>[
+              MenuItem(
+                image: 'images/kfc.jpg',
+                title: foodItemData['Prod Name'],
+                price: foodItemData['Price'],
+                productID: foodItemDocument.id,
+              ),
+            ],
+          ));
+        }
       }
-    }
 
-    setState(() {
-      itemList = temp;
-    });
+      setState(() {
+        itemList = temp;
+      });
+    } catch (error) {
+      print('Error fetching data: $error');
+      // Handle the error as needed
+    }
   }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getCategory();
+    // getCategory();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       backgroundColor: ui.val(0),
+
+      // app bar on top
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(60.0),
         child: AppBar(
@@ -125,51 +192,206 @@ class _CartScreenState extends State<MenuScreen> {
           ),
         ),
       ),
-      body: ListView(
-        physics: BouncingScrollPhysics(),
-        children: [
-          SizedBox(
-            height: 30,
-          ),
-          Row(
+
+      // list view body
+      body: StreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection('restaurants')
+            .doc(
+                "eWjuiXzb15xfWxNnEZai") // will replace with the actual restaurant ID
+            .collection('foodItems')
+            .snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+                child: CircularProgressIndicator(
+              color: Colors.white70,
+            ));
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          }
+
+          List<Category> temp = [];
+
+          snapshot.data!.docs.forEach((foodItemDocument) {
+            Map<String, dynamic> foodItemData =
+                foodItemDocument.data() as Map<String, dynamic>;
+
+            String categoryName = foodItemData['Category Name'];
+
+            int index = categoryExists(temp, categoryName);
+            if (index >= 0) {
+              temp[index].items.add(MenuItem(
+                    image: 'images/kfc.jpg',
+                    title: foodItemData['Prod Name'],
+                    price: foodItemData['Price'],
+                    productID: foodItemDocument.id,
+                  ));
+            } else {
+              temp.add(Category(
+                categoryID: 100,
+                categoryName: categoryName,
+                items: <MenuItem>[
+                  MenuItem(
+                    image: 'images/kfc.jpg',
+                    title: foodItemData['Prod Name'],
+                    price: foodItemData['Price'],
+                    productID: foodItemDocument.id,
+                  ),
+                ],
+              ));
+            }
+          });
+
+          itemList = temp;
+
+          return ListView(
+            physics: BouncingScrollPhysics(),
             children: [
-              IconButton(
-                icon: Icon(
-                  Icons.api_rounded,
-                  color: ui.val(4),
-                ),
-                onPressed: () {},
+              SizedBox(
+                height: 30,
               ),
-              Text(
-                'Edit menu',
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: ui.val(4),
-                ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.api_rounded,
+                      color: ui.val(4),
+                    ),
+                    onPressed: () {},
+                  ),
+                  Text(
+                    'Edit menu',
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: ui.val(4),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
+
+              // the rest of the screen displays a list of category widgets
+              Column(
+                children: itemList.map((category) {
+                  return CategoryWidget(
+                    disp: category,
+                    restaurantID: widget.restaurant.restaurantID,
+                  );
+                }).toList(),
+              ),
+              SizedBox(
+                height: 60,
               ),
             ],
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Column(
-            children: itemList.map((category) {
-              return CategoryWidget(
-                disp: category,
-                restaurantID: widget.restaurant.restaurantID,
-              );
-            }).toList(),
-          ),
-          SizedBox(
-            height: 60,
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 }
 
+/*
+    Updates the Food name and price in Firebase using productID hash
+
+*/
+Future<void> updateFoodItem(String restaurantID, String productId,
+    String newProdName, int newPrice) async {
+  try {
+    // Reference to the specific restaurant document using the provided ID
+    DocumentReference restaurantDocumentRef =
+        FirebaseFirestore.instance.collection('restaurants').doc(restaurantID);
+
+    // Reference to the "foodItems" subcollection inside the restaurant document
+    CollectionReference foodItemsCollection =
+        restaurantDocumentRef.collection('foodItems');
+
+    // Reference to the specific food item document by product ID
+    DocumentReference foodItemDocumentRef = foodItemsCollection.doc(productId);
+
+    // Update the fields in the document
+    await foodItemDocumentRef.update({
+      'Prod Name': newProdName,
+      'Price': newPrice,
+    });
+    snackbar('Food item updated successfully');
+    print('Food item updated successfully!');
+  } catch (error) {
+    print('Error updating food item: $error');
+    snackbar('Error updating food item');
+    // Handle the error as needed
+  }
+}
+
+Future<void> addFoodItem(String restaurantID, String categoryName,
+    String prodName, int price, String likeCount) async {
+  try {
+    // Reference to the "restaurants" collection
+    CollectionReference restaurantsCollection =
+        FirebaseFirestore.instance.collection('restaurants');
+
+    // Reference to the specific restaurant document
+    DocumentReference restaurantDocumentRef =
+        restaurantsCollection.doc(restaurantID);
+
+    // Reference to the "foodItems" subcollection inside the restaurant document
+    CollectionReference foodItemsCollection =
+        restaurantDocumentRef.collection('foodItems');
+
+    // Add a new document with auto-generated ID to the "foodItems" subcollection
+    await foodItemsCollection.add({
+      'Category Name': categoryName,
+      'Prod Name': prodName,
+      'Price': price,
+      'Like Count': likeCount,
+    });
+
+    snackbar('Food item added successfully');
+    print('Food item added successfully!');
+  } catch (error) {
+    print('Error adding food item: $error');
+    snackbar('Error adding food item');
+  }
+}
+
+Future<void> deleteFoodItem(String restaurantID, String foodItemID) async {
+  try {
+    // Reference to the "restaurants" collection
+    CollectionReference restaurantsCollection =
+        FirebaseFirestore.instance.collection('restaurants');
+
+    // Reference to the specific restaurant document
+    DocumentReference restaurantDocumentRef =
+        restaurantsCollection.doc(restaurantID);
+
+    // Reference to the "foodItems" subcollection inside the restaurant document
+    CollectionReference foodItemsCollection =
+        restaurantDocumentRef.collection('foodItems');
+
+    // Reference to the specific food item document by ID
+    DocumentReference foodItemDocumentRef = foodItemsCollection.doc(foodItemID);
+
+    // Delete the document from the "foodItems" subcollection
+    await foodItemDocumentRef.delete();
+
+    snackbar('Food item deleted successfully');
+    print('Food item deleted successfully!');
+  } catch (error) {
+    print('Error deleting food item: $error');
+    snackbar('Error deleting food item');
+  }
+}
+
+/*
+    Displays the categorical divisions of food items on edit menu
+*/
 class CategoryWidget extends StatefulWidget {
   final Category disp;
   final int restaurantID;
@@ -181,6 +403,7 @@ class CategoryWidget extends StatefulWidget {
 }
 
 class _CategoryWidgetState extends State<CategoryWidget> {
+  // edit mode is when checkboxes are displayed
   bool isEditMode = true;
   List<bool> foodSelected = [];
 
@@ -231,11 +454,21 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                 ),
                 if (!isEditMode)
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      for (int i = 0; i < foodSelected.length; i++) {
+                        if (foodSelected[i]) {
+                          // print(widget.disp.items[i].productID);
+                          deleteFoodItem("eWjuiXzb15xfWxNnEZai",
+                              widget.disp.items[i].productID);
+                        }
+                      }
+                      // print(foodSelected);
+                    },
                     child: Text(
                       'delete',
                       style: TextStyle(
-                        color: const Color.fromARGB(255, 255, 102, 91),
+                        color: const Color.fromARGB(255, 255, 102, 91)
+                            .withOpacity(0.8),
                         fontSize: 20,
                       ),
                     ),
@@ -259,8 +492,11 @@ class _CategoryWidgetState extends State<CategoryWidget> {
               if (isEditMode) {
                 return GestureDetector(
                   onTap: () {
-                    print(index);
-
+                    // print(index);
+                    /*
+                      prints Edit food item Bottom Model if 
+                      any food item on the menu is clicked
+                    */
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
@@ -300,6 +536,12 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                                   decoration: InputDecoration(
                                     hintText: 'Enter Food Name',
                                     border: OutlineInputBorder(),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: ui.val(0)),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: ui.val(0)),
+                                    ),
                                     hintStyle: TextStyle(
                                       color: ui.val(4),
                                     ),
@@ -317,12 +559,18 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                                 SizedBox(height: 8.0),
                                 TextField(
                                   onTap: () {
-                                    pricecontroller.clear();
+                                    // pricecontroller.clear();
                                   },
                                   controller: pricecontroller,
                                   decoration: InputDecoration(
                                     hintText: 'Enter Food Price',
                                     border: OutlineInputBorder(),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: ui.val(0)),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: ui.val(0)),
+                                    ),
                                     hintStyle: TextStyle(
                                       color: ui.val(4),
                                     ),
@@ -331,7 +579,20 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                                 ),
                                 SizedBox(height: 25.0),
                                 InkWell(
-                                  onTap: () {},
+                                  /*
+                                      Makes updation operation to database
+                                  */
+                                  onTap: () {
+                                    // print(item.productID);
+                                    // print("boom ${pricecontroller.text}");
+
+                                    updateFoodItem(
+                                        "eWjuiXzb15xfWxNnEZai",
+                                        item.productID,
+                                        namecontroller.text,
+                                        int.parse(pricecontroller.text));
+                                    Navigator.pop(context);
+                                  },
                                   child: Container(
                                     padding:
                                         EdgeInsets.only(top: 15, bottom: 15),
@@ -430,7 +691,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30.0),
-                            color: ui.val(9).withOpacity(0.3),
+                            color: ui.val(9).withOpacity(0.5),
                           ),
                           child: Row(
                             children: [
@@ -442,7 +703,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                                 decoration: BoxDecoration(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(30)),
-                                  color: Colors.white,
+                                  color: ui.val(1),
                                 ),
                               ),
                               SizedBox(
@@ -478,6 +739,8 @@ class _CategoryWidgetState extends State<CategoryWidget> {
               }
             },
           ),
+
+          // Orange add button bottom of every category widget
           GestureDetector(
             onTap: () {
               print('${widget.disp.categoryID}');
@@ -520,6 +783,11 @@ class _CategoryWidgetState extends State<CategoryWidget> {
     );
   }
 
+  /*  
+      Add menu items to a specific food category 
+      pops up bottom modal sheet 
+      user may edit menu food items
+  */
   Future<dynamic> AddMenuItemBottomSheet(
       BuildContext context, int categoryID, int restaurantID) {
     String foodName = '';
@@ -562,6 +830,12 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                   decoration: InputDecoration(
                     hintText: 'Enter Food Name',
                     border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: ui.val(0)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: ui.val(0)),
+                    ),
                     hintStyle: TextStyle(
                       color: ui.val(4),
                     ),
@@ -584,6 +858,12 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                   decoration: InputDecoration(
                     hintText: 'Enter Food Price',
                     border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: ui.val(0)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: ui.val(0)),
+                    ),
                     hintStyle: TextStyle(
                       color: ui.val(4),
                     ),
@@ -599,26 +879,9 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                 SizedBox(height: 25.0),
                 InkWell(
                   onTap: () async {
-                    if (foodName.isNotEmpty && price > 0) {
-                      var db = Mysql();
-                      int productID = await db.addProduct(
-                          foodName, restaurantID, categoryID, price);
-                      for (int i = 0; i < itemList.length; i++) {
-                        if (itemList[i].categoryID == categoryID) {
-                          setState(() {
-                            itemList[i].items.add(MenuItem(
-                                image: 'images/kfc.jpg',
-                                title: foodName,
-                                price: price,
-                                productID: productID));
-                          });
-                        }
-                      }
-                      await Future.delayed(const Duration(seconds: 2));
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                      }
-                    }
+                    addFoodItem("eWjuiXzb15xfWxNnEZai",
+                        widget.disp.categoryName, foodName, price, "0");
+                    Navigator.pop(context);
                   },
                   child: Container(
                     padding: EdgeInsets.only(top: 15, bottom: 15),

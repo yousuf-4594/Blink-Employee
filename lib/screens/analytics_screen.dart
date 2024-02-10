@@ -23,24 +23,29 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   int ordersPlaced = 0;
   int impressions = 0;
   int revenue = 0;
+  double ratingCount = 0;
 
-  void getAnalytics(int restaurantID) async {
-    int orders = await Analytics.getOrdersPlaced(restaurantID);
-    int views = await Analytics.getImpressions(restaurantID);
-    int amount = await Analytics.getRevenue(restaurantID);
+  void getAnalytics() async {
+    int orders =
+        await Analytics.getOrdersPlaced(Global.restaurant.restaurantID);
+    int views = await Analytics.getImpressions(Global.restaurant.restaurantID);
+    int? amount = await Analytics.getRevenue(Global.restaurant.restaurantID);
+    double reviews =
+        await Analytics.getReviewCount(Global.restaurant.restaurantID);
 
     setState(() {
       ordersPlaced = orders;
       impressions = views;
-      revenue = amount;
+      revenue = amount!;
+      ratingCount = reviews;
     });
   }
 
   @override
   void initState() {
     // TODO: implement initState
+    getAnalytics();
     super.initState();
-    // getAnalytics(widget.restaurant.restaurantID);
   }
 
   @override
@@ -90,7 +95,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   OrdersPlacedRow(ordersPlaced: ordersPlaced),
-                  ReviewsRow(),
+                  ReviewsRow(ratingCount: ratingCount.toInt()),
                 ],
               ),
               RevenueRow(revenue: revenue),
@@ -99,9 +104,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   PopularRow(
                     restaurantID: Global.restaurant.restaurantID,
                   ),
-                  piChartRow(
-                    restaurantID: Global.restaurant.restaurantID,
-                  ),
+                  // piChartRow(
+                  //   restaurantID: Global.restaurant.restaurantID,
+                  // ),
                 ],
               ),
               SizedBox(height: 80),
@@ -291,7 +296,7 @@ class RevenueRow extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(20),
         child: Container(
-          padding: EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 15),
+          padding: EdgeInsets.only(top: 5, bottom: 5, left: 15, right: 15),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -304,7 +309,7 @@ class RevenueRow extends StatelessWidget {
                     'Revenue',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 18,
                     ),
                   ),
                   Container(
@@ -339,9 +344,8 @@ class RevenueRow extends StatelessWidget {
 }
 
 class ReviewsRow extends StatelessWidget {
-  const ReviewsRow({
-    super.key,
-  });
+  final int ratingCount;
+  const ReviewsRow({super.key, required this.ratingCount});
 
   @override
   Widget build(BuildContext context) {
@@ -368,7 +372,7 @@ class ReviewsRow extends StatelessWidget {
               builder: (BuildContext context) {
                 return SingleChildScrollView(
                   child: Container(
-                    padding: EdgeInsets.all(16.0),
+                    padding: EdgeInsets.all(14.0),
                     height: MediaQuery.of(context).size.height * 0.4,
                     width: MediaQuery.of(context).size.width,
                     child: Column(
@@ -522,11 +526,11 @@ class ReviewsRow extends StatelessWidget {
                     ),
                     Container(
                       alignment: Alignment.bottomLeft,
-                      child: const Text(
-                        '5.6k',
-                        style: TextStyle(
+                      child: Text(
+                        '$ratingCount',
+                        style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 45,
+                          fontSize: 35,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -582,7 +586,7 @@ class OrdersPlacedRow extends StatelessWidget {
           },
           borderRadius: BorderRadius.circular(20),
           child: Container(
-            padding: EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 15),
+            padding: EdgeInsets.only(top: 4, bottom: 4, left: 15, right: 15),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -595,7 +599,7 @@ class OrdersPlacedRow extends StatelessWidget {
                       'Orders placed',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 18,
                       ),
                     ),
                     Container(
@@ -678,7 +682,7 @@ class ImpressionRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Container(
-        padding: EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 15),
+        padding: EdgeInsets.only(top: 6, bottom: 6, left: 15, right: 15),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -691,7 +695,7 @@ class ImpressionRow extends StatelessWidget {
                   'Impressions',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: 16,
                   ),
                 ),
                 Container(

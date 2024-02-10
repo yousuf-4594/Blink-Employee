@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/mysql.dart';
@@ -41,57 +42,49 @@ class BarChartSample2State extends State<BarChartSample2> {
 
   void getSalesByTimeSlot() async {
     List<BarChartGroupData> temp = [];
-    var db = Mysql();
-    Iterable<ResultSetRow> rows = await db.getResults(
-        'SELECT TIME_FORMAT(placed_at, "%h") + 5 AS hour, SUM(price) AS price FROM Orders WHERE restaurant_id=${widget.restaurantID} AND (HOUR(placed_at) + 5) BETWEEN 8 AND 16 AND status="completed" GROUP BY hour;');
-    for (int i = 0; i < 8; i++) {
+    Map<String, int> stats = {
+      "8": 0,
+      "9": 0,
+      "10": 0,
+      "11": 0,
+      "12": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0
+    };
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection("orders")
+          .orderBy('placedat')
+          .get();
+
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        DateTime timestamp = data["placedat"].toDate();
+        int hour = timestamp.hour;
+        if (stats.containsKey(hour.toString())) {
+          int price = data["price"];
+          stats[hour.toString()] = (stats[hour.toString()]! + price);
+        }
+      }
+    } catch (e) {
+      print(e);
+    }
+    int i = 0;
+    stats.forEach((key, value) {
       temp.add(BarChartGroupData(
         barsSpace: 2,
         x: i,
         barRods: [
           BarChartRodData(
-            toY: 0,
+            toY: value.toDouble(),
             color: widget.leftBarColor,
             width: width,
           )
         ],
       ));
-    }
-    for (var row in rows) {
-      int hour = int.parse(row.assoc()['hour']!);
-      double price = double.parse(row.assoc()['price']!);
-      if (hour >= 8 && hour <= 12) {
-        temp.removeAt(hour - 8);
-        temp.insert(
-            hour - 8,
-            BarChartGroupData(
-              barsSpace: 2,
-              x: hour - 8,
-              barRods: [
-                BarChartRodData(
-                  toY: price / 1000,
-                  color: widget.leftBarColor,
-                  width: width,
-                )
-              ],
-            ));
-      } else if (hour >= 1 && hour <= 4) {
-        temp.removeAt(hour + 4);
-        temp.insert(
-            hour + 4,
-            BarChartGroupData(
-              barsSpace: 2,
-              x: hour + 4,
-              barRods: [
-                BarChartRodData(
-                  toY: price / 1000,
-                  color: widget.leftBarColor,
-                  width: width,
-                )
-              ],
-            ));
-      }
-    }
+      i++;
+    });
 
     setState(() {
       items = temp;

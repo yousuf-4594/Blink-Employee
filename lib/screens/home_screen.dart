@@ -14,26 +14,38 @@ import 'package:http/http.dart' as http;
 
 import 'package:food_delivery_restraunt/mysql.dart';
 
+import '../classes/globals.dart';
+
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
   int loginID = -1;
-  Restaurant restaurant;
 
-  HomeScreen({super.key, required this.restaurant});
+  HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-
-
 class _HomeScreenState extends State<HomeScreen> {
-
   NotificationServices notificationServices = NotificationServices();
+  late Restaurant restaurant = Restaurant(
+      restaurantID: "restaurantID", name: "name", ownerName: 'ownername');
+
+  void getRestaurant() async {
+    Restaurant temp = await Restaurant.getCurrentRestaurant();
+    setState(() {
+      restaurant = temp;
+    });
+  }
 
   @override
   void initState() {
+    if (restaurant.name == "name") {
+      getRestaurant();
+    }
+
     super.initState();
+
     notificationServices.requestNotificationPermission();
     notificationServices.forgroundMessage();
     notificationServices.firebaseInit(context);
@@ -46,9 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
         print(value);
       }
     });
-    
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: FlexibleSpaceBar(
                 // Homepage restaurant Title
                 title: Text(
-                  widget.restaurant.name,
+                  Global.restaurant.name,
                   style: TextStyle(
                     fontFamily: 'Britanic',
                     fontSize: 40,
@@ -208,8 +218,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: TabBarView(
                             children: [
                               OrderListView(
-                                restaurantID: widget.restaurant.restaurantID,
-                                restaurantName: widget.restaurant.name,
+                                restaurantID: restaurant.restaurantID,
+                                restaurantName: restaurant.name,
                                 status: 'all',
                                 notificationServices: notificationServices,
                               ),
@@ -231,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class OrderListView extends StatefulWidget {
   final String status;
-  final int restaurantID;
+  final String restaurantID;
   final String restaurantName;
   final NotificationServices notificationServices;
 
@@ -257,7 +267,7 @@ class _OrderListViewState extends State<OrderListView> {
   }
 
   /*
-    Displays list of restaurant orders 
+    Displays list of restaurant orders
   */
   @override
   Widget build(BuildContext context) {
@@ -355,8 +365,8 @@ class _OrderListViewState extends State<OrderListView> {
                               customerRef.get().then((customerSnapshot) {
                                 if (customerSnapshot.exists) {
                                   // Extract the FCM token from the customer document
-                                  String? fcmToken = (customerSnapshot.data() as Map<String, dynamic>?)?['fcmToken'];
-
+                                  String? fcmToken = (customerSnapshot.data()
+                                      as Map<String, dynamic>?)?['fcmToken'];
 
                                   // Check if fcmToken is not null before using it
                                   if (fcmToken != null) {
@@ -364,45 +374,49 @@ class _OrderListViewState extends State<OrderListView> {
                                     customerRef.update({
                                       'Placed Order': false,
                                       'Review.Placed': false,
-                                      'Review.Restaurant ID': "eWjuiXzb15xfWxNnEZai",// sufiyaan idhr dekho
-                                      'Review.Restaurant Name': widget.restaurantName,
+                                      'Review.Restaurant ID':
+                                          "eWjuiXzb15xfWxNnEZai", // sufiyaan idhr dekho
+                                      'Review.Restaurant Name':
+                                          widget.restaurantName,
                                     }).then((value) {
                                       print('Review updated successfully');
 
                                       // Use the FCM token for further processing
                                       print('FCM Token: $fcmToken');
 
-                                      widget.notificationServices.getDeviceToken().then((value)async{
-
+                                      widget.notificationServices
+                                          .getDeviceToken()
+                                          .then((value) async {
                                         var data = {
-                                          'to' : fcmToken,
-                                          'priority' : 'high',
-                                          'notification' : {
-                                            'title' : 'Order completed' ,
-                                            'body' : 'Your Order of Rs.${orders[index].price} has been successfully completed and is now ready for pickup.',
+                                          'to': fcmToken,
+                                          'priority': 'high',
+                                          'notification': {
+                                            'title': 'Order completed',
+                                            'body':
+                                                'Your Order of Rs.${orders[index].price} has been successfully completed and is now ready for pickup.',
                                           },
                                           'android': {
                                             'notification': {
                                               'notification_count': 23,
                                             },
                                           },
-                                          'data' : {
-                                            'type' : 'msj' ,
-                                            'id' : 'Blink'
-                                          }
+                                          'data': {'type': 'msj', 'id': 'Blink'}
                                         };
 
-                                        await http.post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
-                                            body: jsonEncode(data) ,
+                                        await http.post(
+                                            Uri.parse(
+                                                'https://fcm.googleapis.com/fcm/send'),
+                                            body: jsonEncode(data),
                                             headers: {
-                                              'Content-Type': 'application/json; charset=UTF-8',
-                                              'Authorization' : 'key=AAAASf-EVnA:APA91bEIQRrSlWG6ZsqN5PopS9v36DgfkU8hRtZTeqB3UtGpaoK2qL9-R-hZC1I-GKKel0A1qsrDkZiyjZCDwjlQNqIwEHOUt-GnVWfAXJVTodBv2vZMeZTp8aVchQxZZwfFXONoQby8'
-                                            }
-                                        ).then((value){
+                                              'Content-Type':
+                                                  'application/json; charset=UTF-8',
+                                              'Authorization':
+                                                  'key=AAAASf-EVnA:APA91bEIQRrSlWG6ZsqN5PopS9v36DgfkU8hRtZTeqB3UtGpaoK2qL9-R-hZC1I-GKKel0A1qsrDkZiyjZCDwjlQNqIwEHOUt-GnVWfAXJVTodBv2vZMeZTp8aVchQxZZwfFXONoQby8'
+                                            }).then((value) {
                                           if (kDebugMode) {
                                             print(value.body.toString());
                                           }
-                                        }).onError((error, stackTrace){
+                                        }).onError((error, stackTrace) {
                                           if (kDebugMode) {
                                             print(error);
                                           }

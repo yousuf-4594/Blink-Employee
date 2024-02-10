@@ -5,7 +5,7 @@ import 'package:food_delivery_restraunt/mysql.dart';
 import '../classes/CategorySales.dart';
 
 class PieChartSample extends StatefulWidget {
-  final int restaurantID;
+  final String restaurantID;
   const PieChartSample({super.key, required this.restaurantID});
 
   @override
@@ -16,7 +16,7 @@ class PieChartSample extends StatefulWidget {
 class PieChart2State extends State {
   int touchedIndex = -1;
   List<Indicator> categorySalesIndicator = [];
-  final int restaurantID;
+  final String restaurantID;
 
   PieChart2State({required this.restaurantID});
 

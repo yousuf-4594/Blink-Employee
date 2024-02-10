@@ -23,8 +23,6 @@ class _MainNavigatorState extends State<MainNavigator> {
   int currentPageIndex = 0;
   @override
   Widget build(BuildContext context) {
-    HomeScreenArguments homeScreenArguments =
-        ModalRoute.of(context)!.settings.arguments as HomeScreenArguments;
     return Scaffold(
       bottomNavigationBar: GNav(
         backgroundColor: ui.val(0),
@@ -63,17 +61,11 @@ class _MainNavigatorState extends State<MainNavigator> {
         ],
       ),
       body: <Widget>[
-        HomeScreen(
-          restaurant: homeScreenArguments.restaurant,
-        ),
+        HomeScreen(),
         // LoginScreen(),
-        AnalyticsScreen(
-          restaurant: homeScreenArguments.restaurant,
-        ),
-        MenuScreen(
-          restaurant: homeScreenArguments.restaurant,
-        ),
-        SettingsScreen(restaurant: homeScreenArguments.restaurant),
+        AnalyticsScreen(),
+        MenuScreen(),
+        SettingsScreen(),
       ][currentPageIndex],
     );
   }

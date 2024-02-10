@@ -75,7 +75,7 @@ class Mysql {
     conn.close();
   }
 
-  Future<List<CategorySales>> getCategorySales(int restaurantID) async {
+  Future<List<CategorySales>> getCategorySales(String restaurantID) async {
     List<CategorySales> temp = [];
     List<Color> colors = [
       Colors.red,
@@ -108,7 +108,7 @@ class Mysql {
     return temp;
   }
 
-  Future<List<PopularFood>> getPopularFood(int restaurantID) async {
+  Future<List<PopularFood>> getPopularFood(String restaurantID) async {
     List<PopularFood> foods = [];
     var db = Mysql();
     Iterable<ResultSetRow> rows = await db.getResults(

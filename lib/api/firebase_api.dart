@@ -4,11 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:path_provider/path_provider.dart';
 
 class NotificationServices {
   //initialising firebase message plugin
@@ -24,8 +20,8 @@ class NotificationServices {
     var androidInitializationSettings =
         const AndroidInitializationSettings('@mipmap/notification');
 
-    var initializationSetting = InitializationSettings(
-        android: androidInitializationSettings);
+    var initializationSetting =
+        InitializationSettings(android: androidInitializationSettings);
 
     await _flutterLocalNotificationsPlugin.initialize(initializationSetting,
         onDidReceiveNotificationResponse: (payload) {
@@ -87,13 +83,13 @@ class NotificationServices {
   // function to show visible notification when app is active
   Future<void> showNotification(RemoteMessage message) async {
     AndroidNotificationChannel channel = AndroidNotificationChannel(
-        message.notification!.android!.channelId.toString(),
-        message.notification!.android!.channelId.toString(),
-        importance: Importance.max,
-        showBadge: true,
-        playSound: true,
-        // sound: const RawResourceAndroidNotificationSound('jetsons_doorbell'),
-        );
+      message.notification!.android!.channelId.toString(),
+      message.notification!.android!.channelId.toString(),
+      importance: Importance.max,
+      showBadge: true,
+      playSound: true,
+      // sound: const RawResourceAndroidNotificationSound('jetsons_doorbell'),
+    );
 
     AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
@@ -108,8 +104,8 @@ class NotificationServices {
             //  icon: largeIconPath
             );
 
-    NotificationDetails notificationDetails = NotificationDetails(
-        android: androidNotificationDetails);
+    NotificationDetails notificationDetails =
+        NotificationDetails(android: androidNotificationDetails);
 
     Future.delayed(Duration.zero, () {
       _flutterLocalNotificationsPlugin.show(

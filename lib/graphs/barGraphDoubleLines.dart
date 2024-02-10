@@ -4,7 +4,7 @@ import 'package:food_delivery_restraunt/mysql.dart';
 import 'package:mysql_client/mysql_client.dart';
 
 class BarChartSample2 extends StatefulWidget {
-  final int restaurantID;
+  final String restaurantID;
   BarChartSample2({super.key, required this.restaurantID});
   final Color leftBarColor = Colors.orange;
   final Color avgColor = Colors.greenAccent;

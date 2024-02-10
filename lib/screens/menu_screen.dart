@@ -7,6 +7,7 @@ import 'package:mysql_client/mysql_client.dart';
 import 'package:food_delivery_restraunt/classes/UiColor.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../classes/globals.dart';
 import '../classes/restaurant.dart';
 
 /*
@@ -33,8 +34,7 @@ void snackbar(String content) {
 }
 
 class MenuScreen extends StatefulWidget {
-  final Restaurant restaurant;
-  const MenuScreen({super.key, required this.restaurant});
+  const MenuScreen({super.key});
 
   @override
   State<MenuScreen> createState() => _CartScreenState();
@@ -283,7 +283,7 @@ class _CartScreenState extends State<MenuScreen> {
                 children: itemList.map((category) {
                   return CategoryWidget(
                     disp: category,
-                    restaurantID: widget.restaurant.restaurantID,
+                    restaurantID: Global.restaurant.restaurantID,
                   );
                 }).toList(),
               ),
@@ -394,7 +394,7 @@ Future<void> deleteFoodItem(String restaurantID, String foodItemID) async {
 */
 class CategoryWidget extends StatefulWidget {
   final Category disp;
-  final int restaurantID;
+  final String restaurantID;
 
   CategoryWidget({required this.disp, required this.restaurantID});
 
@@ -789,7 +789,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
       user may edit menu food items
   */
   Future<dynamic> AddMenuItemBottomSheet(
-      BuildContext context, int categoryID, int restaurantID) {
+      BuildContext context, int categoryID, String restaurantID) {
     String foodName = '';
     int price = -1;
 

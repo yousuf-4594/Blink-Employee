@@ -82,7 +82,7 @@ class Order {
   //   }
   // }
 
-  static Stream<List<Order>> getRealTimeOrders(int restaurantID) {
+  static Stream<List<Order>> getRealTimeOrders(String restaurantID) {
     try {
       CollectionReference ordersCollection =
           FirebaseFirestore.instance.collection('orders');

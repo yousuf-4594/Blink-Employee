@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:food_delivery_restraunt/components/setting_switch.dart';
 import 'package:food_delivery_restraunt/components/title_button.dart';
 import 'package:flutter/services.dart';
+import '../classes/globals.dart';
 import '../classes/restaurant.dart';
 import '../graphs/barGraphDoubleLines.dart';
 import 'package:food_delivery_restraunt/classes/UIColor.dart';
@@ -9,8 +11,7 @@ import '../graphs/piChart.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const String id = 'settings_screen';
-  final Restaurant restaurant;
-  const SettingsScreen({super.key, required this.restaurant});
+  const SettingsScreen({super.key});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -36,6 +37,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late String name = '';
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Color.fromARGB(255, 44, 44, 44),
@@ -47,7 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: ListView(
         children: [
           Header(
-            name: widget.restaurant.name,
+            name: Global.restaurant.name,
           ),
           const SizedBox(height: 30.0),
           Divider(color: Colors.transparent, thickness: 2),
@@ -100,7 +107,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: ElevatedButton.styleFrom(
                 primary: ui.val(10),
               ),
-              onPressed: () {
+              onPressed: () async {
+                try {
+                  await FirebaseAuth.instance.signOut();
+                } catch (e) {
+                  print(e);
+                }
                 Navigator.pop(context);
               },
               child: Container(

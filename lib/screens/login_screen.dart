@@ -1,38 +1,120 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:food_delivery_restraunt/classes/globals.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:food_delivery_restraunt/services/navigator.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:food_delivery_restraunt/components/plain_text_field.dart';
-import 'package:food_delivery_restraunt/components/password_text_field.dart';
 import 'package:food_delivery_restraunt/components/large_button.dart';
 import 'package:food_delivery_restraunt/components/bottom_container.dart';
 import 'package:food_delivery_restraunt/mysql.dart';
-import 'package:food_delivery_restraunt/user.dart';
+// import 'package:food_delivery_restraunt/user1.dart';
 import 'package:mysql_client/mysql_client.dart';
 import 'package:food_delivery_restraunt/classes/restaurant.dart';
-import 'package:food_delivery_restraunt/arguments/home_screen_arguments.dart';
-import 'package:food_delivery_restraunt/classes/UiColor.dart';
-import 'package:flutter/services.dart';
+// import 'package:food_delivery_restraunt/arguments/home_screen_arguments.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
+import 'package:food_delivery_restraunt/classes/UIColor.dart';
+// import 'package:food_delivery_restraunt/screens/forgot_password_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../arguments/home_screen_arguments.dart';
+import '../components/large_button.dart';
+import '../services/navigator.dart';
+
+class PasswordTextField extends StatefulWidget {
+  final String hintText;
+  final bool error;
+  final Function(String) onChange;
+  final TextEditingController? controller;
+  final String? errorText; // Add errorText parameter
+
+  PasswordTextField({
+    required this.hintText,
+    required this.onChange,
+    required this.error,
+    this.controller,
+    this.errorText, // Initialize errorText parameter
+  });
+
+  @override
+  _PasswordTextFieldState createState() => _PasswordTextFieldState();
+}
+
+class _PasswordTextFieldState extends State<PasswordTextField> {
+  bool _obscureText = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      elevation: 5,
+      color: ui.val(2),
+      borderRadius: BorderRadius.circular(15),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 10,
+        ),
+        decoration: BoxDecoration(
+          color: ui.val(1).withOpacity(0.5),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+              width: 0.5,
+              color: widget.error == true ? Colors.red : Colors.transparent),
+        ),
+        child: TextField(
+          obscureText: _obscureText,
+          onChanged: widget.onChange,
+          controller: widget.controller,
+          style: TextStyle(
+            color: ui.val(4),
+          ),
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            labelText: "Password",
+            labelStyle: TextStyle(
+              color: ui.val(4).withOpacity(0.5),
+            ),
+            hintText: widget.hintText,
+            hintStyle:
+                TextStyle(color: ui.val(4).withOpacity(0.5)), // Hint text color
+            errorText: widget.errorText, // Set error text
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscureText ? Icons.visibility : Icons.visibility_off,
+                color: ui.val(3),
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscureText = !_obscureText;
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class LoginScreen extends StatefulWidget {
   static const id = 'login_screen';
 
-  LoginScreen({super.key});
+  LoginScreen({Key? key}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  var username;
-  late String ownerName;
-  List<Restaurant> restaurants = [];
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  User? _user;
+  var email;
   var password;
   bool loginValid = true;
   String loginFailedMessage = '';
   late int loginID;
-  late String restaurantName;
+  late String firstName;
+  bool _isLoadingGoogle = false;
+  bool _isLoadingSignIn = false;
 
   Widget buildBottomSheet(BuildContext context) {
     return BottomContainer();
@@ -41,72 +123,58 @@ class _LoginScreenState extends State<LoginScreen> {
   var db = Mysql();
 
   Future<bool> _login(String username, String password) async {
-    // var conn = await db.getConnection();
-    // await conn.connect();
-    // var results = await conn.execute(
-    //     'SELECT * FROM Customer WHERE username="$username" AND password="$password";');
-    // conn.close();
     Iterable<ResultSetRow> rows = await db.getResults(
-        'SELECT * FROM Restaurant R INNER JOIN RestaurantAccount A ON (R.username = A.username) WHERE R.username="$username" AND A.password="$password";');
+        'SELECT * FROM Customer C INNER JOIN Account A ON (C.username = A.username) WHERE C.username="$username" AND A.password="$password";');
     if (rows.length == 1) {
       for (var row in rows) {
-        loginID = int.parse(row.assoc()['restaurant_id']!);
-        restaurantName = row.assoc()['name']!;
-        ownerName = row.assoc()['owner_name']!;
+        loginID = int.parse(row.assoc()['customer_id']!);
+        firstName = row.assoc()['first_name']!;
       }
       return true;
     } else {
+      setState(() {
+        loginFailedMessage = 'Email or password incorrect'; // Set error message
+      });
       return false;
     }
   }
 
-  void getRestaurants() async {
-    Iterable<ResultSetRow> rows = await db
-        .getResults('SELECT restaurant_id, name, owner_name FROM Restaurant;');
-    for (var row in rows) {
-      restaurants.add(Restaurant(
-          restaurantID: int.parse(row.assoc()['restaurant_id']!),
-          name: row.assoc()['name']!,
-          ownerName: row.assoc()['owner_name']!));
-    }
-  }
-
-  late TextEditingController _usernameTextController;
-  late TextEditingController _passwordTextController;
-
+  TextEditingController _usernameTextController = TextEditingController();
+  TextEditingController _passwordTextController = TextEditingController();
   void getSharedPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      username = prefs.getString('username')!;
+      email = prefs.getString('username')!;
       password = prefs.getString('password')!;
-      print("username " + username);
-      print("password " + password);
     });
   }
 
-  Future<String?> getUsername() async {
+  Future<String> getUsername() async {
     SharedPreferences signPrefs = await SharedPreferences.getInstance();
-    username = signPrefs.get('username2');
-    return username;
+    email = signPrefs.getString('username') ??
+        ''; // Provide a default value if null
+    return email;
   }
 
-  Future<String?> getPassword() async {
+  Future<String> getPassword() async {
     SharedPreferences signPrefs = await SharedPreferences.getInstance();
-    password = signPrefs.get('password2');
+    password = signPrefs.getString('password') ??
+        ''; // Provide a default value if null
     return password;
   }
 
   @override
   void initState() {
     super.initState();
-    _usernameTextController = TextEditingController();
-    _passwordTextController = TextEditingController();
-    initializeTextControllers();
-  }
-
-  Future<void> initializeTextControllers() async {
-    _usernameTextController.text = await getUsername() ?? '';
-    _passwordTextController.text = await getPassword() ?? '';
+    _auth.authStateChanges().listen((event) {
+      setState(() {
+        _user = event;
+      });
+    });
+    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+      _usernameTextController.text = await getUsername();
+      _passwordTextController.text = await getPassword();
+    });
   }
 
   @override
@@ -160,132 +228,104 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 50,
                 ),
                 PlainTextField(
-                  hintText: 'Enter Username',
+                  hintText: 'Enter Email',
                   onChange: (text) {
-                    username = text;
+                    email = text;
                   },
-                  labelText: 'Username',
+                  labelText: 'Email',
                   controller: _usernameTextController,
+                  errorText: loginFailedMessage.isNotEmpty
+                      ? loginFailedMessage
+                      : null, // Pass error message
                 ),
                 SizedBox(
                   height: 25,
                 ),
                 PasswordTextField(
+                  error: loginFailedMessage.isNotEmpty ? true : false,
                   hintText: 'Enter Password',
                   onChange: (text) {
                     password = text;
                   },
                   controller: _passwordTextController,
+                  errorText: null,
                 ),
                 SizedBox(
                   height: 20,
-                ),
-                Text(
-                  loginFailedMessage,
-                  textAlign: TextAlign.start,
-                  style: GoogleFonts.lato(
-                    textStyle: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: Colors.red,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 5),
+                    child: Text(
+                      loginFailedMessage.isNotEmpty ? loginFailedMessage : "",
+                      style: TextStyle(color: Colors.red.withOpacity(0.7)),
                     ),
                   ),
-                ),
-                GestureDetector(
-                  child: Text(
-                    'Forgot Password',
-                    textAlign: TextAlign.end,
-                    style: GoogleFonts.lato(
-                      textStyle: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: ui.val(4).withOpacity(0.3),
-                      ),
-                    ),
-                  ),
-                  onTap: () {
-                    showModalBottomSheet(
-                        context: context, builder: buildBottomSheet);
-                  },
                 ),
                 SizedBox(
                   height: 20,
                 ),
                 LargeButton(
                   onPressed: () async {
-                    if (await _login(username, password)) {
+                    setState(() {
+                      _isLoadingSignIn = true;
+                    });
+                    try {
+                      final user = await _auth.signInWithEmailAndPassword(
+                          email: email, password: password);
+                      if (user != null) {
+                        if (await Global.isRestaurant(user.user!.uid)) {
+                          Restaurant temp =
+                              await Restaurant.getCurrentRestaurant();
+                          setState(() {
+                            Global.restaurant = temp;
+                          });
+                          Navigator.pushNamed(
+                            context,
+                            MainNavigator.id,
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      print(e);
                       setState(() {
-                        loginFailedMessage = '';
+                        loginFailedMessage =
+                            'Email or password incorrect'; // Set error message
                       });
-                      final SharedPreferences prefs =
-                          await SharedPreferences.getInstance();
-                      await prefs.setString('username2', username);
-                      await prefs.setString('password2', password);
-                      getRestaurants();
-                      Restaurant restaurant = Restaurant(
-                          restaurantID: loginID,
-                          name: restaurantName,
-                          ownerName: ownerName);
-                      Navigator.pushNamed(context, MainNavigator.id,
-                          arguments:
-                              HomeScreenArguments(restaurant: restaurant));
-                    } else {
-                      setState(
-                        () {
-                          loginFailedMessage = 'Invalid username or password';
-                        },
-                      );
+                    } finally {
+                      setState(() {
+                        _isLoadingSignIn = false;
+                      });
                     }
                   },
                   color: ui.val(10),
                   verticalPadding: 15,
-                  buttonChild: Text(
-                    'Sign In',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.lato(
-                      textStyle: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                        color: ui.val(1),
-                      ),
-                    ),
-                  ),
+                  buttonChild: _isLoadingSignIn
+                      ? SizedBox(
+                          height: 23,
+                          width: 23,
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          'Sign In',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.lato(
+                            textStyle: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              color: ui.val(1),
+                            ),
+                          ),
+                        ),
                 ),
                 SizedBox(
-                  height: 55,
+                  height: 20,
                 ),
-                // Row(
-                //   children: [
-                //     Expanded(
-                //       child: Divider(),
-                //     ),
-                //     SizedBox(
-                //       width: 15,
-                //     ),
-                //     Text(
-                //       "or continue with",
-                //     ),
-                //     SizedBox(
-                //       width: 15,
-                //     ),
-                //     Expanded(
-                //       child: Divider(),
-                //     ),
-                //   ],
-                // ),
-                // SizedBox(
-                //   height: 20,
-                // ),
-                LargeButton(
-                  onPressed: () {},
-                  color: ui.val(1).withOpacity(0.3),
-                  verticalPadding: 10,
-                  buttonChild: Image.asset(
-                    'images/google.png',
-                    height: 40,
-                    color: ui.val(4).withOpacity(0.5),
-                  ),
-                )
+                SizedBox(
+                  height: 20,
+                ),
               ],
             ),
           ),

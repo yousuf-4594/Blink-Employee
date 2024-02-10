@@ -6,14 +6,14 @@ import 'package:food_delivery_restraunt/screens/revenueScreen.dart';
 import 'package:food_delivery_restraunt/services/analytics.dart';
 import 'package:food_delivery_restraunt/classes/UiColor.dart';
 import 'package:flutter/services.dart';
+import '../classes/globals.dart';
 import '../classes/restaurant.dart';
 import '../graphs/barGraphDoubleLines.dart';
 import '../graphs/piChart.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   static const String id = 'analytics_screen';
-  final Restaurant restaurant;
-  const AnalyticsScreen({super.key, required this.restaurant});
+  const AnalyticsScreen({super.key});
 
   @override
   State<AnalyticsScreen> createState() => _AnalyticsScreenState();
@@ -40,7 +40,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getAnalytics(widget.restaurant.restaurantID);
+    // getAnalytics(widget.restaurant.restaurantID);
   }
 
   @override
@@ -56,7 +56,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             ),
             automaticallyImplyLeading: false,
             title: Text(
-              widget.restaurant.name,
+              Global.restaurant.name,
               style: TextStyle(
                 fontSize: 50,
                 fontFamily: 'Britanic',
@@ -84,7 +84,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             children: <Widget>[
               ImpressionRow(impressions: impressions),
               TimeSlotSalesRow(
-                restaurantID: widget.restaurant.restaurantID,
+                restaurantID: Global.restaurant.restaurantID,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -97,10 +97,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               Row(
                 children: [
                   PopularRow(
-                    restaurantID: widget.restaurant.restaurantID,
+                    restaurantID: Global.restaurant.restaurantID,
                   ),
                   piChartRow(
-                    restaurantID: widget.restaurant.restaurantID,
+                    restaurantID: Global.restaurant.restaurantID,
                   ),
                 ],
               ),
@@ -112,7 +112,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 }
 
 class piChartRow extends StatelessWidget {
-  final int restaurantID;
+  final String restaurantID;
   piChartRow({super.key, required this.restaurantID});
 
   @override
@@ -160,7 +160,7 @@ class piChartRow extends StatelessWidget {
 }
 
 class PopularRow extends StatefulWidget {
-  final int restaurantID;
+  final String restaurantID;
   const PopularRow({super.key, required this.restaurantID});
 
   @override
@@ -631,7 +631,7 @@ class OrdersPlacedRow extends StatelessWidget {
 }
 
 class TimeSlotSalesRow extends StatelessWidget {
-  final int restaurantID;
+  final String restaurantID;
   const TimeSlotSalesRow({super.key, required this.restaurantID});
 
   @override

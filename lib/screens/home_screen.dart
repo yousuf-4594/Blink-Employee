@@ -1,12 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:food_delivery_restraunt/api/firebase_api.dart';
 import 'package:food_delivery_restraunt/classes/order.dart';
 import 'package:food_delivery_restraunt/classes/restaurant.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'package:food_delivery_restraunt/classes/UiColor.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:food_delivery_restraunt/mysql.dart';
 
@@ -21,7 +25,31 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+
+
 class _HomeScreenState extends State<HomeScreen> {
+
+  NotificationServices notificationServices = NotificationServices();
+
+  @override
+  void initState() {
+    super.initState();
+    notificationServices.requestNotificationPermission();
+    notificationServices.forgroundMessage();
+    notificationServices.firebaseInit(context);
+    notificationServices.setupInteractMessage(context);
+    notificationServices.isTokenRefresh();
+
+    notificationServices.getDeviceToken().then((value) {
+      if (kDebugMode) {
+        print('device token');
+        print(value);
+      }
+    });
+    
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -183,6 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 restaurantID: widget.restaurant.restaurantID,
                                 restaurantName: widget.restaurant.name,
                                 status: 'all',
+                                notificationServices: notificationServices,
                               ),
                             ],
                           ),
@@ -204,12 +233,14 @@ class OrderListView extends StatefulWidget {
   final String status;
   final int restaurantID;
   final String restaurantName;
+  final NotificationServices notificationServices;
 
   const OrderListView({
     Key? key,
     required this.status,
     required this.restaurantID,
     required this.restaurantName,
+    required this.notificationServices,
   }) : super(key: key);
 
   @override
@@ -320,15 +351,74 @@ class _OrderListViewState extends State<OrderListView> {
                                       .collection('customers')
                                       .doc(orders[index].customerID);
 
-                              customerRef.update({
-                                'Review.Placed': false,
-                                'Review.Restaurant ID':
-                                    "eWjuiXzb15xfWxNnEZai", // sufiyaan idhr dekho
-                                'Review.Restaurant Name': widget.restaurantName,
-                              }).then((value) {
-                                print('Review updated successfully');
+                              // Get the customer document data
+                              customerRef.get().then((customerSnapshot) {
+                                if (customerSnapshot.exists) {
+                                  // Extract the FCM token from the customer document
+                                  String? fcmToken = (customerSnapshot.data() as Map<String, dynamic>?)?['fcmToken'];
+
+
+                                  // Check if fcmToken is not null before using it
+                                  if (fcmToken != null) {
+                                    // Update the review and other fields
+                                    customerRef.update({
+                                      'Placed Order': false,
+                                      'Review.Placed': false,
+                                      'Review.Restaurant ID': "eWjuiXzb15xfWxNnEZai",// sufiyaan idhr dekho
+                                      'Review.Restaurant Name': widget.restaurantName,
+                                    }).then((value) {
+                                      print('Review updated successfully');
+
+                                      // Use the FCM token for further processing
+                                      print('FCM Token: $fcmToken');
+
+                                      widget.notificationServices.getDeviceToken().then((value)async{
+
+                                        var data = {
+                                          'to' : fcmToken,
+                                          'priority' : 'high',
+                                          'notification' : {
+                                            'title' : 'Order completed' ,
+                                            'body' : 'Your Order of Rs.${orders[index].price} has been successfully completed and is now ready for pickup.',
+                                          },
+                                          'android': {
+                                            'notification': {
+                                              'notification_count': 23,
+                                            },
+                                          },
+                                          'data' : {
+                                            'type' : 'msj' ,
+                                            'id' : 'Blink'
+                                          }
+                                        };
+
+                                        await http.post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
+                                            body: jsonEncode(data) ,
+                                            headers: {
+                                              'Content-Type': 'application/json; charset=UTF-8',
+                                              'Authorization' : 'key=AAAASf-EVnA:APA91bEIQRrSlWG6ZsqN5PopS9v36DgfkU8hRtZTeqB3UtGpaoK2qL9-R-hZC1I-GKKel0A1qsrDkZiyjZCDwjlQNqIwEHOUt-GnVWfAXJVTodBv2vZMeZTp8aVchQxZZwfFXONoQby8'
+                                            }
+                                        ).then((value){
+                                          if (kDebugMode) {
+                                            print(value.body.toString());
+                                          }
+                                        }).onError((error, stackTrace){
+                                          if (kDebugMode) {
+                                            print(error);
+                                          }
+                                        });
+                                      });
+                                    }).catchError((error) {
+                                      print('Error updating review: $error');
+                                    });
+                                  } else {
+                                    print('FCM Token is null');
+                                  }
+                                } else {
+                                  print('Customer document does not exist');
+                                }
                               }).catchError((error) {
-                                print('Error updating review: $error');
+                                print('Error fetching customer data: $error');
                               });
                             },
                             autoClose: true,
